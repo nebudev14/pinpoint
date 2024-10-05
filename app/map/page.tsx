@@ -21,7 +21,7 @@ export default function Component() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
+      <header className="z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
         <h1 className="text-xl font-bold">Community Events</h1>
         <Button variant="ghost" size="icon">
           <MapPin className="h-6 w-6" />
@@ -29,14 +29,14 @@ export default function Component() {
         </Button>
       </header>
 
-      <main className="flex-1 relative">
+      <main className="flex-1 relative overflow-hidden">
         {/* Map component */}
         <div className="absolute inset-0">
           <Map />
         </div>
 
         {/* Integrated search bar */}
-        <div className="absolute top-20 left-4 right-4 z-10">
+        <div className="absolute top-4 left-4 right-4 z-10">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
@@ -53,48 +53,55 @@ export default function Component() {
           </div>
         </div>
 
-        
-        {/* Floating Action Button (FAB) for adding new events */}
-        <div className="absolute bottom-16 right-4">
-          {isFabMenuOpen && (
-            <div className="mb-4 space-y-2">
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => console.log("Add Pin clicked")}
-              >
-                Add Pin
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => console.log("Add Topic clicked")}
-              >
-                Add Topic
-              </Button>
-            </div>
-          )}
-          <Button
-            className="rounded-full shadow-lg"
-            size="icon"
-            onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-          >
-            <Plus className="h-6 w-6" />
-            <span className="sr-only">Add New Event</span>
-          </Button>
+        {/* Integrated Floating Action Button (FAB) for adding new events */}
+        <div className="absolute bottom-20 left-4 z-10">
+          <div className="relative">
+            <Button
+              className="rounded-full shadow-lg bg-white bg-opacity-90 text-primary hover:bg-primary hover:text-primary-foreground"
+              size="icon"
+              onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+            >
+              <Plus className="h-6 w-6" />
+              <span className="sr-only">Add New Event</span>
+            </Button>
+            {isFabMenuOpen && (
+              <div className="absolute bottom-full left-0 mb-2 space-y-2 bg-white bg-opacity-90 p-2 rounded-lg shadow-md">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => console.log("Add Pin clicked")}
+                >
+                  Add Pin
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => console.log("Add Topic clicked")}
+                >
+                  Add Topic
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Slide-up menu */}
-        <div className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${isMenuOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)]'} z-20`}>
+        <div 
+          className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${
+            isMenuOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)]'
+          } z-20`}
+        >
           <div 
             className="flex justify-center p-2 cursor-pointer"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <ChevronUp className={`h-6 w-6 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
           </div>
-          <div className="p-4 max-h-[70vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">Upcoming Events</h2>
-            <div className="space-y-4">
+          <div className="px-4 pb-4">
+            <h2 className="text-lg font-semibold mb-2 overflow-hidden whitespace-nowrap">
+              {isMenuOpen ? 'Upcoming Events' : ''}
+            </h2>
+            <div className={`space-y-4 overflow-y-auto transition-all duration-300 ${isMenuOpen ? 'max-h-[50vh]' : 'max-h-0'}`}>
               {upcomingEvents.map((event) => (
                 <Card key={event.id}>
                   <CardHeader>
