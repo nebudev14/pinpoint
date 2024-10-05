@@ -10,6 +10,7 @@ import { MapPin, Plus, Search, ChevronUp, Calendar, Clock } from "lucide-react"
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
 
   // Mock data for upcoming events
   const upcomingEvents = [
@@ -48,14 +49,36 @@ export default function Component() {
           </div>
         </div>
 
-        {/* Floating Action Button for adding new events */}
-        <Button
-          className="absolute bottom-4 right-4 rounded-full shadow-lg"
-          size="icon"
-        >
-          <Plus className="h-6 w-6" />
-          <span className="sr-only">Add New Event</span>
-        </Button>
+        
+        {/* Floating Action Button (FAB) for adding new events */}
+        <div className="absolute bottom-16 right-4">
+          {isFabMenuOpen && (
+            <div className="mb-4 space-y-2">
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => console.log("Add Pin clicked")}
+              >
+                Add Pin
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => console.log("Add Topic clicked")}
+              >
+                Add Topic
+              </Button>
+            </div>
+          )}
+          <Button
+            className="rounded-full shadow-lg"
+            size="icon"
+            onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+          >
+            <Plus className="h-6 w-6" />
+            <span className="sr-only">Add New Event</span>
+          </Button>
+        </div>
 
         {/* Slide-up menu */}
         <div className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${isMenuOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)]'}`}>
