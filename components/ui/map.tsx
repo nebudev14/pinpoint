@@ -1,9 +1,12 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+
 
 const containerStyle = {
   width: '100%',
@@ -76,8 +79,24 @@ const mapStyles = [
   },
 ];
 
+
 const Map: React.FC = () => {
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [pins, setPins] = useState<any[]>([]); // State to store pins
+
+  const fetchPins = async () => {
+    // Fetching data from the "pins" table
+    const { data, error } = await supabase.from('pins').select('*');
+    if (error) {
+      console.error('Error fetching pins:', error);
+    } else {
+      setPins(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchPins(); // Fetch pins on component mount
+  }, []);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -108,13 +127,19 @@ const Map: React.FC = () => {
         onUnmount={onUnmount}
         options={mapOptions}
       >
-        <Marker position={center} />
+        {/* Render a marker for each pin */}
+        {pins.map(pin => (
+            <Marker
+              key={pin.id}
+              position={{ lat: pin.latitude, lng: pin.longitude }}
+              title={pin.name} // Optional: Set the name of the pin as the marker title
+            />
+          ))}
       </GoogleMap>
     </LoadScript>
    </div>
   );
 };
-
 
 export default React.memo(Map);
 
