@@ -13,6 +13,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
+import React from "react";
 
 export default function Home() {
   const { isSignedIn } = useAuth();
