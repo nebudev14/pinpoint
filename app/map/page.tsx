@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import TopicSearch from '@/components/topic-search';
 import Map from "@/components/ui/map";
 import {
   Card,
@@ -53,7 +54,11 @@ export default function Component() {
           <span className="sr-only">My Location</span>
         </Button>
       </header>
-
+      <div className="absolute z-10 top-20 left-4 right-4">
+          <div className="relative">
+          <TopicSearch />
+          </div>
+        </div>
       <main className="relative flex-1">
         {/* Map component */}
         <div className="absolute inset-0 h-screen">
@@ -98,9 +103,8 @@ export default function Component() {
 
         {/* Slide-up menu */}
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${
-            isMenuOpen ? "translate-y-0" : "translate-y-[calc(100%-2.5rem)]"
-          } z-20`}
+          className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${isMenuOpen ? "translate-y-0" : "translate-y-[calc(100%-2.5rem)]"
+            } z-20`}
         >
           <div
             className="flex justify-center p-2 cursor-pointer"
@@ -131,24 +135,6 @@ export default function Component() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-
-            {/* Integrated search bar */}
-            <div className="absolute z-10 bottom-8 left-4 right-4">
-              <div className="relative">
-                <Search className="absolute w-4 h-4 text-gray-500 transform -translate-y-1/2 left-3 top-1/2" />
-                <Input
-                  type="search"
-                  placeholder="Search events..."
-                  className="w-full py-2 pl-10 pr-4 text-black bg-white border border-gray-300 rounded-full shadow-md bg-opacity-90 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    WebkitAppearance: "none",
-                    outline: "none",
-                  }}
-                />
-              </div>
             </div>
           </div>
         </div>
