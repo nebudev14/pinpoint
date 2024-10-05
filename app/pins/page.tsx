@@ -5,7 +5,7 @@ export default async function Pins() {
   const supabase = createClient();
   const { data: topics } = await supabase.from("topics").select();
   const user =  await currentUser();
-
+  console.log("REACHED")
   console.log(user?.id);
 
   // return <pre>{JSON.stringify(pins, null, 2)}</pre>

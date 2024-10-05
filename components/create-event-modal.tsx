@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +34,11 @@ import { cn } from "@/utils/cn";
 import { useUser } from "@clerk/nextjs";
 
 export default function CreateEventModal({ topics }: { topics: any }) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
   const mapContainerStyle = {
     width: "100%",
     height: "300px",
@@ -46,6 +52,7 @@ export default function CreateEventModal({ topics }: { topics: any }) {
   const [open, setOpen] = useState(false);
   const [eventName, setEventName] = useState("");
   const [eventType, setEventType] = useState("");
+  const [eventDescription, setEventDescription] = useState(""); 
   const [location, setLocation] = useState(center);
 
   const { isLoaded } = useJsApiLoader({
@@ -66,12 +73,35 @@ export default function CreateEventModal({ topics }: { topics: any }) {
     });
   }, []);
 
-  const handleCreateEvent = () => {
+  async function handleCreateEvent(e: React.FormEvent){
+    console.log("CREATING NEW EVENT");
+    e.preventDefault();
     console.log("Creating event:", {
       name: eventName,
       type: eventType,
+      description: eventDescription,
       location,
     });
+
+  const { data, error } = await supabase
+    .from('pins') // Replace with your actual table name
+    .insert([
+      {
+        name: eventName,
+        description: eventDescription,
+        topic_id: eventType,
+        latitude: location.lat,
+        longitude: location.lng,
+        user_id: user?.id,
+      }
+    ]);
+
+  if (error) {
+    console.error('Error adding event:', error);
+  } else {
+    console.log('Event added successfully:', data);
+  }
+
     setEventName("");
     setEventType("");
     setLocation(center);
@@ -99,99 +129,114 @@ export default function CreateEventModal({ topics }: { topics: any }) {
             map. Click create when you're done.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="event-name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="event-name"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="event-type" className="text-right">
-              Type
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className={cn(
-                    "col-span-3 justify-between",
-                    !eventType && "text-muted-foreground"
+          <form onSubmit={handleCreateEvent}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="event-name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="event-name"
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="event-type" className="text-right">
+                  Type
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "col-span-3 justify-between",
+                        !eventType && "text-muted-foreground"
+                      )}
+                    >
+                      {eventType
+                        ? eventTypes.find((type: any) => type.value === eventType)
+                            ?.label
+                        : "Select event type"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search event type..." />
+                      <CommandEmpty>No event type found.</CommandEmpty>
+                      <CommandList>
+                        {eventTypes.map((type: any) => (
+                          <CommandItem
+                            key={type.value}
+                            onSelect={() => {
+                              setEventType(
+                                type.value === eventType ? "" : type.value
+                              );
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                eventType === type.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {type.label}
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {/* Add a description field */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="topic-description" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="topic-description"
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter event description"
+              />
+            </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Location</Label>
+                <div className="col-span-3">
+                  {isLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={mapContainerStyle}
+                      center={location}
+                      zoom={10}
+                      onClick={onMapClick}
+                      onLoad={onMapLoad}
+                    >
+                      <Marker position={location} />
+                    </GoogleMap>
+                  ) : (
+                    <div>Loading map...</div>
                   )}
-                >
-                  {eventType
-                    ? eventTypes.find((type: any) => type.value === eventType)
-                        ?.label
-                    : "Select event type"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[300px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search event type..." />
-                  <CommandEmpty>No event type found.</CommandEmpty>
-                  <CommandList>
-                    {eventTypes.map((type: any) => (
-                      <CommandItem
-                        key={type.value}
-                        onSelect={() => {
-                          setEventType(
-                            type.value === eventType ? "" : type.value
-                          );
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            eventType === type.value
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {type.label}
-                      </CommandItem>
-                    ))}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Location</Label>
-            <div className="col-span-3">
-              {isLoaded ? (
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={location}
-                  zoom={10}
-                  onClick={onMapClick}
-                  onLoad={onMapLoad}
-                >
-                  <Marker position={location} />
-                </GoogleMap>
-              ) : (
-                <div>Loading map...</div>
-              )}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Coordinates</Label>
+                <div className="col-span-3">
+                  Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Coordinates</Label>
-            <div className="col-span-3">
-              Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button type="submit" onClick={handleCreateEvent}>
-            Create Event
-          </Button>
-        </DialogFooter>
+            <DialogFooter>
+              <Button type="submit">
+                Create Event
+              </Button>
+            </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
