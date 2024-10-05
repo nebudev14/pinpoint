@@ -33,6 +33,8 @@ const Map: React.FC = () => {
         zoomControl: true, // Enable zoom control if needed
       };
 
+      
+
   return (
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
       <GoogleMap
@@ -47,6 +49,8 @@ const Map: React.FC = () => {
       </GoogleMap>
     </LoadScript>
   );
+
+
 }
 
 export default React.memo(Map);

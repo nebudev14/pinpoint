@@ -19,38 +19,42 @@ export default function Component() {
   ]
 
   return (
-    <div className="flex flex-col h-screen ">
-      <header className="flex items-center justify-between p-4 bg-primary text-primary-foreground">
-        <h1 className="text-xl font-bold ">Community Events</h1>
+    <div className="flex flex-col h-screen">
+      <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
+        <h1 className="text-xl font-bold">Community Events</h1>
         <Button variant="ghost" size="icon">
           <MapPin className="h-6 w-6" />
           <span className="sr-only">My Location</span>
         </Button>
       </header>
 
-      <main className="flex-1 overflow-hidden relative">
+      <main className="flex-1 relative">
         {/* Map component */}
-        <div className="w-full h-full bg-muted flex items-center justify-center">
+        <div className="absolute inset-0">
           <Map />
         </div>
 
-        {/* Floating search bar */}
-        <div className="absolute top-4 left-0 right-0 px-4">
+        {/* Integrated search bar */}
+        <div className="absolute top-20 left-4 right-4 z-10">
           <div className="relative">
-            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
               type="search"
               placeholder="Search events..."
-              className="pl-8 pr-4 py-2 w-full bg-background/90 backdrop-blur-sm"
+              className="pl-10 pr-4 py-2 w-full bg-white bg-opacity-90 text-black placeholder:text-gray-500 border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                WebkitAppearance: 'none',
+                outline: 'none',
+              }}
             />
           </div>
         </div>
 
         {/* Floating Action Button for adding new events */}
         <Button
-          className="absolute bottom-4 right-4 rounded-full shadow-lg"
+          className="absolute bottom-20 right-4 rounded-full shadow-lg z-10"
           size="icon"
         >
           <Plus className="h-6 w-6" />
@@ -58,7 +62,7 @@ export default function Component() {
         </Button>
 
         {/* Slide-up menu */}
-        <div className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${isMenuOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)]'}`}>
+        <div className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${isMenuOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)]'} z-20`}>
           <div 
             className="flex justify-center p-2 cursor-pointer"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
