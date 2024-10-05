@@ -1,5 +1,9 @@
 import React, { useCallback, useRef } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const containerStyle = {
   width: '100%',
@@ -111,4 +115,6 @@ const Map: React.FC = () => {
   );
 };
 
+
 export default React.memo(Map);
+
