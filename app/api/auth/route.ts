@@ -72,7 +72,7 @@ export async function POST(req: Request) {
         created_at: new Date().toISOString(),
       }
 
-      const { data, error } = await client.from('users2').insert(userData).select().single();
+      const { data, error } = await client.from('users').insert(userData).select().single();
       console.log(data);
 
       if (error) {
