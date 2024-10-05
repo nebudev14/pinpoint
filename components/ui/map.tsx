@@ -25,6 +25,14 @@ const Map: React.FC = () => {
     mapRef.current = null;
   }, []);
 
+    // Define map options
+    const mapOptions = {
+        mapTypeControl: false, // Disable the map type control (MAP | SATELLITE)
+        streetViewControl: false, // Optional: Disable Street View control
+        fullscreenControl: false, // Optional: Disable Fullscreen control
+        zoomControl: true, // Enable zoom control if needed
+      };
+
   return (
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
       <GoogleMap
@@ -33,6 +41,7 @@ const Map: React.FC = () => {
         zoom={10}
         onLoad={onLoad}
         onUnmount={onUnmount}
+        options={mapOptions}
       >
         <Marker position={center} />
       </GoogleMap>
