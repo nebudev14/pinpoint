@@ -1,6 +1,7 @@
 import CreateEventModal from '@/components/create-event-modal';
 import { createClient } from '@/utils/supabase/server';
 import { currentUser } from '@clerk/nextjs/server';
+
 export default async function Pins() {
   const supabase = createClient();
   const { data: topics } = await supabase.from("topics").select();

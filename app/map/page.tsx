@@ -21,28 +21,28 @@ export default function Component() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
-        <h1 className="text-xl font-bold">Community Events</h1>
+      <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
+        <h1 className="text-xl font-bold">Vicinity</h1>
         <Button variant="ghost" size="icon">
-          <MapPin className="h-6 w-6" />
+          <MapPin className="w-6 h-6" />
           <span className="sr-only">My Location</span>
         </Button>
       </header>
 
-      <main className="flex-1 relative overflow-hidden">
+      <main className="relative flex-1">
         {/* Map component */}
         <div className="absolute inset-0">
           <Map />
         </div>
 
         {/* Integrated search bar */}
-        <div className="absolute top-4 left-4 right-4 z-10">
+        <div className="absolute z-10 top-20 left-4 right-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="absolute w-4 h-4 text-gray-500 transform -translate-y-1/2 left-3 top-1/2" />
             <Input
               type="search"
               placeholder="Search events..."
-              className="pl-10 pr-4 py-2 w-full bg-white bg-opacity-90 text-black placeholder:text-gray-500 border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full py-2 pl-10 pr-4 text-black bg-white border border-gray-300 rounded-full shadow-md bg-opacity-90 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -53,36 +53,35 @@ export default function Component() {
           </div>
         </div>
 
-        {/* Integrated Floating Action Button (FAB) for adding new events */}
-        <div className="absolute bottom-20 left-4 z-10">
-          <div className="relative">
-            <Button
-              className="rounded-full shadow-lg bg-white bg-opacity-90 text-primary hover:bg-primary hover:text-primary-foreground"
-              size="icon"
-              onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-            >
-              <Plus className="h-6 w-6" />
-              <span className="sr-only">Add New Event</span>
-            </Button>
-            {isFabMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-2 space-y-2 bg-white bg-opacity-90 p-2 rounded-lg shadow-md">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => console.log("Add Pin clicked")}
-                >
-                  Add Pin
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => console.log("Add Topic clicked")}
-                >
-                  Add Topic
-                </Button>
-              </div>
-            )}
-          </div>
+        
+        {/* Floating Action Button (FAB) for adding new events */}
+        <div className="absolute bottom-16 right-4">
+          {isFabMenuOpen && (
+            <div className="mb-4 space-y-2">
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => console.log("Add Pin clicked")}
+              >
+                Add Pin
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => console.log("Add Topic clicked")}
+              >
+                Add Topic
+              </Button>
+            </div>
+          )}
+          <Button
+            className="rounded-full shadow-lg"
+            size="icon"
+            onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+          >
+            <Plus className="w-6 h-6" />
+            <span className="sr-only">Add New Event</span>
+          </Button>
         </div>
 
         {/* Slide-up menu */}
@@ -97,11 +96,9 @@ export default function Component() {
           >
             <ChevronUp className={`h-6 w-6 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
           </div>
-          <div className="px-4 pb-4">
-            <h2 className="text-lg font-semibold mb-2 overflow-hidden whitespace-nowrap">
-              {isMenuOpen ? 'Upcoming Events' : ''}
-            </h2>
-            <div className={`space-y-4 overflow-y-auto transition-all duration-300 ${isMenuOpen ? 'max-h-[50vh]' : 'max-h-0'}`}>
+          <div className="p-4 max-h-[70vh] overflow-y-auto">
+            <h2 className="mb-4 text-lg font-semibold">Upcoming Events</h2>
+            <div className="space-y-4">
               {upcomingEvents.map((event) => (
                 <Card key={event.id}>
                   <CardHeader>
@@ -110,11 +107,11 @@ export default function Component() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-2" />
+                      <Calendar className="w-4 h-4 mr-2" />
                       {event.date}
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground mt-1">
-                      <Clock className="h-4 w-4 mr-2" />
+                    <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4 mr-2" />
                       {event.time}
                     </div>
                   </CardContent>
