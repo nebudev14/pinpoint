@@ -30,7 +30,7 @@ const Map: React.FC = () => {
         mapTypeControl: false, // Disable the map type control (MAP | SATELLITE)
         streetViewControl: false, // Optional: Disable Street View control
         fullscreenControl: false, // Optional: Disable Fullscreen control
-        zoomControl: true, // Enable zoom control if needed
+        zoomControl: false, // Enable zoom control if needed
       };
 
       
