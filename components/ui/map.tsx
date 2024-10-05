@@ -14,8 +14,8 @@ const containerStyle = {
 };
 
 const center = {
-  lat: 40.73061,
-  lng: -73.935242,
+  lat: 40.807384,
+  lng: -73.963036,
 };
 
 // Updated map styles to hide points of interest
@@ -114,6 +114,7 @@ const Map: React.FC = () => {
     zoomControl: true,
     styles: mapStyles,
     backgroundColor: '#f5f2e9', // Matching the background color with the overall theme
+    gestureHandling: "greedy"
   };
 
   return (
@@ -126,6 +127,7 @@ const Map: React.FC = () => {
         onLoad={onLoad}
         onUnmount={onUnmount}
         options={mapOptions}
+    
       >
         {/* Render a marker for each pin */}
         {pins.map(pin => (
