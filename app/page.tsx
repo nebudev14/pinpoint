@@ -19,21 +19,21 @@ export default function Home() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (isSignedIn) {
-  //     router.push("/dashboard");
-  //   }
-  // }, [isSignedIn, router]);
+  useEffect(() => {
+    if (isSignedIn) {
+      router.push("/map");
+    }
+  }, [isSignedIn, router]);
 
   return (
     <>
       {/* <Hero />
-      <main className="flex-1 flex flex-col gap-6 px-4">
-        <h2 className="font-medium text-xl mb-4">Vicinity</h2>
+      <main className="flex flex-col flex-1 gap-6 px-4">
+        <h2 className="mb-4 text-xl font-medium">Vicinity</h2>
         {!isSignedIn && (
           <div className="flex">
             <SignInButton mode="modal">
-              <button className="bg-gray-700 text-white px-6 py-3 rounded-full flex items-center space-x-2 absolute bottom-10 right-10 hover:bg-gray-600 transition-colors">
+              <button className="absolute flex items-center px-6 py-3 space-x-2 text-white transition-colors bg-gray-700 rounded-full bottom-10 right-10 hover:bg-gray-600">
                 <span>Sign Up</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
@@ -42,12 +42,12 @@ export default function Home() {
         )}
       </main> */}
       <div className="flex flex-col min-h-screen">
-        <header className="px-4 lg:px-6 h-14 flex items-center">
+        <header className="flex items-center px-4 lg:px-6 h-14">
           <Link className="flex items-center justify-center" href="#">
-            <MapPin className="h-6 w-6 text-primary" />
+            <MapPin className="w-6 h-6 text-primary" />
             <span className="ml-2 text-2xl font-bold">Vicinity</span>
           </Link>
-          <nav className="ml-auto flex gap-4 sm:gap-6">
+          <nav className="flex gap-4 ml-auto sm:gap-6">
             {!isSignedIn ? (
               <SignInButton mode="modal">
                 <Button asChild>
