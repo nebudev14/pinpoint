@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Map from "@/components/ui/map"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Plus, Search, ChevronUp, Calendar, Clock } from "lucide-react"
 
@@ -28,9 +29,9 @@ export default function Component() {
       </header>
 
       <main className="flex-1 overflow-hidden relative">
-        {/* Placeholder for the map component */}
+        {/* Map component */}
         <div className="w-full h-full bg-muted flex items-center justify-center">
-          <span className="text-muted-foreground">Map Component Goes Here</span>
+          <Map />
         </div>
 
         {/* Floating search bar */}
