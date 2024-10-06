@@ -14,11 +14,21 @@ import {
 } from "@/components/ui/card";
 import { MapPin, Plus, Search, ChevronUp, Calendar, Clock } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { MultiValue } from "react-select";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
+  const [selectedTopics, setSelectedTopics] = useState<MultiValue<{ value: number; label: string }>>([])
+  const [queriedPins, setQueriedPins] = useState<any[]>([])
 
   // Mock data for upcoming events
   const upcomingEvents = [
@@ -45,6 +55,13 @@ export default function Component() {
     },
   ];
 
+  async function handleSearchTopics(data: any) {
+    // console.log("SEARCHING TOPICS");
+    // e.preventDefault();
+    console.log("Database Found Topics:", data);
+    setQueriedPins(data);
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
@@ -56,13 +73,13 @@ export default function Component() {
       </header>
       <div className="absolute z-10 top-20 left-4 right-4">
           <div className="relative">
-          <TopicSearch />
+          <TopicSearch onSearch={handleSearchTopics}/>
           </div>
         </div>
       <main className="relative flex-1">
         {/* Map component */}
         <div className="absolute inset-0 h-screen">
-          <Map />
+          <Map pins={queriedPins}/>
         </div>
 
         <div className="absolute z-10 top-20 left-4 right-4">
