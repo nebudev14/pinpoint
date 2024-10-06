@@ -24,6 +24,15 @@ import {
   ThumbsUp,
   TrendingUp,
   Sparkles,
+  Code,
+  Laptop,
+  Palette,
+  Book,
+  Music,
+  Camera,
+  Dumbbell,
+  ShowerHead,
+  Siren
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { MultiValue } from "react-select";
@@ -57,23 +66,23 @@ export default function Component() {
 
   const { user } = useUser();
 
-  // Mock data for each category
-  const recommendedEvents = [
+  const interests = [
     {
+      icon: ShowerHead,
+      label: "Bathrooms",
+      gradient: "from-blue-500 to-cyan-500",
       id: 1,
-      title: "Tech Conference 2023",
-      location: "San Francisco, CA",
-      date: "2023-09-15",
-      time: "09:00 AM",
-      color: "bg-blue-50",
     },
     {
-      id: 2,
-      title: "Art Exhibition",
-      location: "New York, NY",
-      date: "2023-09-20",
-      time: "10:00 AM",
-      color: "bg-purple-50",
+      icon: Siren,
+      label: "Police",
+      gradient: "from-red-500 to-rose-500",
+    },
+    
+    {
+      icon: Dumbbell,
+      label: "Fitness",
+      gradient: "from-purple-500 to-pink-500",
     },
   ];
 
@@ -196,7 +205,20 @@ export default function Component() {
       </header>
       <div className="absolute z-10 top-20 left-4 right-4">
         <div className="relative">
+          
           <TopicSearch onSearch={handleSearchTopics} />
+          <div className="flex flex-wrap justify-center gap-4 ">
+            {interests.map((interest, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className={`flex items-center gap-2 w-28 text-sm mt-4  justify-center bg-gradient-to-r ${interest.gradient} text-white border-none hover:opacity-80 transition-opacity`}
+              >
+                <interest.icon className="w-4 h-4" />
+                <span>{interest.label}</span>
+              </Button>
+            ))}
+          </div>
           {/* <DropdownSearch /> */}
         </div>
       </div>
@@ -359,9 +381,7 @@ export default function Component() {
                       Recommended for you
                     </h2>
                     {/* {renderEvents(recommendedEvents)} */}
-                    <h1 className="mb-3">
-                      {recEvent?.event.reason}
-                    </h1>
+                    <h1 className="mb-3">{recEvent?.event.reason}</h1>
                     {recEvent !== undefined ? (
                       renderEvents([
                         {
