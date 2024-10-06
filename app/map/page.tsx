@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import TopicSearch from '@/components/topic-search';
+import TopicSearch from "@/components/topic-search";
 import Map from "@/components/ui/map";
 import {
   Card,
@@ -29,18 +29,22 @@ import { createClient } from "@supabase/supabase-js";
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+);
 import { motion, AnimatePresence } from "framer-motion";
 import CreatePinModal from "@/components/create-event-modal"; // Ensure this import is present
+import CreateTopicModal from "@/components/create-topic-modal";
 
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
-  const [selectedTopics, setSelectedTopics] = useState<MultiValue<{ value: number; label: string }>>([])
-  const [queriedPins, setQueriedPins] = useState<any[]>([])
+  const [selectedTopics, setSelectedTopics] = useState<
+    MultiValue<{ value: number; label: string }>
+  >([]);
+  const [queriedPins, setQueriedPins] = useState<any[]>([]);
   const [isCreatePinModalOpen, setIsCreatePinModalOpen] = useState(false);
   const [topics, setTopics] = useState<any[]>([]);
+  const [isCreateTopicModalOpen, setIsCreateTopicModalOpen] = useState(false);
 
   // Mock data for upcoming events
   const upcomingEvents = [
@@ -72,7 +76,7 @@ export default function Component() {
     // e.preventDefault();
     console.log("Database Found Topics:", data);
     setQueriedPins(data);
-  };
+  }
   // console.log(isCreatePinModalOpen)
 
   useEffect(() => {
@@ -108,20 +112,25 @@ export default function Component() {
         </Button>
       </header>
       <div className="absolute z-10 top-20 left-4 right-4">
-          <div className="relative">
-          <TopicSearch onSearch={handleSearchTopics}/>
-          </div>
+        <div className="relative">
+          <TopicSearch onSearch={handleSearchTopics} />
         </div>
+      </div>
       <main className="relative flex-1">
         {/* Map component */}
         <div className="absolute inset-0 h-screen">
-          <Map pins={queriedPins}/>
+          <Map pins={queriedPins} />
         </div>
 
         <CreatePinModal
           topics={topics} // Ensure topics is defined or passed correctly
           open={isCreatePinModalOpen}
           setOpen={setIsCreatePinModalOpen}
+        />
+
+        <CreateTopicModal
+          open={isCreateTopicModalOpen}
+          setOpen={setIsCreateTopicModalOpen}
         />
 
         <div className="absolute z-10 top-20 left-4 right-4">
@@ -159,11 +168,20 @@ export default function Component() {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <button className="p-2 text-white bg-blue-500 rounded-full"
-                      onClick={() => setIsCreatePinModalOpen(!isCreatePinModalOpen)}>
+                      <button
+                        className="p-2 text-white bg-blue-500 rounded-full"
+                        onClick={() =>
+                          setIsCreatePinModalOpen(!isCreatePinModalOpen)
+                        }
+                      >
                         <MapPin size={20} />
                       </button>
-                      <button className="p-2 text-white bg-green-500 rounded-full">
+                      <button
+                        className="p-2 text-white bg-green-500 rounded-full"
+                        onClick={() =>
+                          setIsCreateTopicModalOpen(!isCreateTopicModalOpen)
+                        }
+                      >
                         <FileText size={20} />
                       </button>
                     </motion.div>
@@ -196,8 +214,9 @@ export default function Component() {
 
         {/* Slide-up menu */}
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${isMenuOpen ? "translate-y-0" : "translate-y-[calc(100%-2.5rem)]"
-            } z-20`}
+          className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-transform duration-300 ease-in-out transform ${
+            isMenuOpen ? "translate-y-0" : "translate-y-[calc(100%-2.5rem)]"
+          } z-20`}
         >
           <div
             className="flex justify-center p-2 cursor-pointer"

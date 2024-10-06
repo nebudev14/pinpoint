@@ -16,14 +16,15 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarPlus, Check, ChevronsUpDown } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
+import { Dispatch, SetStateAction } from "react";
 
 
-export default function CreateTopicModal() {
+export default function CreateTopicModal({ open, setOpen }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [topicName, setTopicName] = useState("");
   const [topicDescription, setTopicDescription] = useState(""); 
 
