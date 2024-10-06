@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TopicSearch from "@/components/topic-search";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Map from "@/components/ui/map";
 import {
   Card,
@@ -20,6 +21,9 @@ import {
   Calendar,
   Clock,
   FileText,
+  ThumbsUp,
+  TrendingUp,
+  Sparkles,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { MultiValue } from "react-select";
@@ -46,31 +50,94 @@ export default function Component() {
   const [isCreatePinModalOpen, setIsCreatePinModalOpen] = useState(false);
   const [topics, setTopics] = useState<any[]>([]);
   const [isCreateTopicModalOpen, setIsCreateTopicModalOpen] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
 
-  // Mock data for upcoming events
-  const upcomingEvents = [
+  // Mock data for each category
+  const recommendedEvents = [
     {
       id: 1,
-      title: "Community Picnic",
-      date: "2023-07-15",
-      time: "12:00 PM",
-      location: "Central Park",
+      title: "Tech Conference 2023",
+      location: "San Francisco, CA",
+      date: "2023-09-15",
+      time: "09:00 AM",
+      color: "bg-blue-50",
     },
     {
       id: 2,
-      title: "Local Art Exhibition",
-      date: "2023-07-18",
-      time: "6:00 PM",
-      location: "City Gallery",
-    },
-    {
-      id: 3,
-      title: "Farmers Market",
-      date: "2023-07-20",
-      time: "9:00 AM",
-      location: "Main Street",
+      title: "Art Exhibition",
+      location: "New York, NY",
+      date: "2023-09-20",
+      time: "10:00 AM",
+      color: "bg-purple-50",
     },
   ];
+
+  const upcomingEvents = [
+    {
+      id: 3,
+      title: "Music Festival",
+      location: "Austin, TX",
+      date: "2023-10-01",
+      time: "12:00 PM",
+      color: "bg-green-50",
+    },
+    {
+      id: 4,
+      title: "Food & Wine Expo",
+      location: "Chicago, IL",
+      date: "2023-10-05",
+      time: "11:00 AM",
+      color: "bg-yellow-50",
+    },
+  ];
+
+  const trendingEvents = [
+    {
+      id: 5,
+      title: "Fashion Week",
+      location: "Paris, France",
+      date: "2023-09-25",
+      time: "02:00 PM",
+      color: "bg-pink-50",
+    },
+    {
+      id: 6,
+      title: "Gaming Convention",
+      location: "Los Angeles, CA",
+      date: "2023-10-10",
+      time: "10:00 AM",
+      color: "bg-indigo-50",
+    },
+  ];
+
+  const [activeTab, setActiveTab] = useState("recommended");
+
+  const renderEvents = (events: any[]) => (
+    <div className="space-y-4">
+      {events.map((event: any) => (
+        <Card key={event.id} className={`overflow-hidden ${event.color}`}>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-lg font-semibold">
+              {event.title}
+            </CardTitle>
+            <CardDescription className="text-sm">
+              {event.location}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 pt-2">
+            <div className="flex items-center text-sm text-muted-foreground mb-1">
+              <Calendar className="w-4 h-4 mr-2" />
+              {event.date}
+            </div>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="w-4 h-4 mr-2" />
+              {event.time}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 
   async function handleSearchTopics(data: any) {
     // console.log("SEARCHING TOPICS");
@@ -96,8 +163,25 @@ export default function Component() {
       }
     };
 
+    const fetchPins = async () => {
+      const { data, error } = await supabase
+        .from("pins")
+        .select()
+        .in("topic_id", [8, 6, 5, 7]);
+
+      if (error) {
+        console.error("Error fetching pins:", error);
+      } else {
+        setEvents(data);
+      }
+    };
+
+    fetchPins();
     fetchTopics();
   }, [setTopics]);
+
+  console.log("EVENTS");
+  console.log(events);
 
   return (
     <div className="flex flex-col h-screen">
@@ -229,26 +313,66 @@ export default function Component() {
             />
           </div>
           <div className="p-4 max-h-[70vh] overflow-y-auto">
-            <h2 className="mb-4 text-lg font-semibold">Upcoming Events</h2>
-            <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <Card key={event.id}>
-                  <CardHeader>
-                    <CardTitle>{event.title}</CardTitle>
-                    <CardDescription>{event.location}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {event.date}
-                    </div>
-                    <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-2" />
-                      {event.time}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="w-full max-w-md mx-auto p-4 bg-background">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-3 mb-6">
+                  <TabsTrigger value="recommended" className="text-xs py-2">
+                    <ThumbsUp className="w-4 h-4 mr-1" />
+                    For You
+                  </TabsTrigger>
+                  <TabsTrigger value="upcoming" className="text-xs py-2">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Upcoming
+                  </TabsTrigger>
+                  <TabsTrigger value="trending" className="text-xs py-2">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    Trending
+                  </TabsTrigger>
+                </TabsList>
+                <div className="max-h-[calc(100vh-160px)] overflow-y-auto px-1">
+                  <TabsContent value="recommended">
+                    <h2 className="mb-4 text-xl font-bold flex items-center">
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Recommended for you
+                    </h2>
+                    {renderEvents(recommendedEvents)}
+                  </TabsContent>
+                  <TabsContent value="upcoming">
+                    <h2 className="mb-4 text-xl font-bold flex items-center">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Upcoming Events
+                    </h2>
+                    {renderEvents(
+                      events.slice(0, 2).map((event, index) => {
+                        return {
+                          title: event.name,
+                          location: event.latitude + ", " + event.longitude,
+                          date:
+                            event.datetime !== null
+                              ? event.datetime!.split("T")[0]
+                              : "N/A",
+                          time:
+                            event.datetime !== null
+                              ? event.datetime!.split("T")[1]
+                              : "N/A",
+                          color: index === 0 ? "bg-green-50" : "bg-yellow-50",
+                        };
+                      })
+                    )}
+                  </TabsContent>
+                  <TabsContent value="trending">
+                    <h2 className="mb-4 text-xl font-bold flex items-center">
+                      <TrendingUp className="w-5 h-5 mr-2" />
+                      Trending
+                    </h2>
+                    {renderEvents(trendingEvents)}
+                  </TabsContent>
+                </div>
+              </Tabs>
             </div>
           </div>
         </div>

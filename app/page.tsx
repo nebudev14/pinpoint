@@ -47,7 +47,7 @@ export default function Home() {
         <header className="flex items-center px-4 lg:px-6 h-14">
           <Link className="flex items-center justify-center" href="#">
             <MapPin className="w-6 h-6 text-primary" />
-            <span className="ml-2 text-2xl font-bold">Vicinity</span>
+            <span className="ml-2 text-2xl font-bold">PinPoint</span>
           </Link>
           <nav className="flex gap-4 ml-auto sm:gap-6">
             {!isSignedIn ? (

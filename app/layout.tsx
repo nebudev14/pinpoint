@@ -15,8 +15,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Vicinity",
-  description: "Be within the vicinity of your community.",
+  title: "Pinpoint",
+  description: "Rediscover your community.",
   manifest: "/manifest.json",
 };
 
