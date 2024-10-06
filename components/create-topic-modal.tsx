@@ -1,115 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { CalendarPlus, Check, ChevronsUpDown } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
-import { Dispatch, SetStateAction } from "react";
+import { CalendarPlus } from "lucide-react";
 
-
-export default function CreateTopicModal({ open, setOpen }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
+export default function CreateTopicModal({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-  // const [open, setOpen] = useState(false);
+
   const [topicName, setTopicName] = useState("");
-  const [topicDescription, setTopicDescription] = useState(""); 
+  const [topicDescription, setTopicDescription] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
 
+  // Simulating user authentication
+  useEffect(() => {
+    // This is a placeholder. In a real app, you'd check the user's auth status here.
+    setUserId("example-user-id");
+  }, []);
 
-  console.log('CREATING NEW TOPIC');
-
-  async function handleCreatePin(e: React.FormEvent){
-    console.log("REACHED")
+  async function handleCreateTopic(e: React.FormEvent) {
     e.preventDefault();
-    // Here you would typically send the data to your backend or state management system
-    console.log("Topic created:", { topicName, topicDescription });
-    setOpen(false);
+    console.log("Creating new topic");
+
+    if (!userId) {
+      console.error('User not authenticated');
+      return;
+    }
 
     const { data, error } = await supabase
-    .from('topics') // Replace with your actual table name
-    .insert([
-      {
-        name: topicName,
-        description: topicDescription,
-        user_id: user?.id,
-      }
-    ]);
+      .from('topics')
+      .insert([
+        {
+          name: topicName,
+          description: topicDescription,
+          user_id: userId,
+        }
+      ]);
 
-  if (error) {
-    console.error('Error adding topic:', error);
-  } else {
-    console.log('Topic added successfully:', data);
-  }
+    if (error) {
+      console.error('Error adding topic:', error);
+    } else {
+      console.log('Topic added successfully:', data);
+    }
 
-    // Reset form
+    // Reset form and close modal
     setTopicName("");
     setTopicDescription("");
-  };
-
-  const { user } = useUser();
-  console.log(user?.id);
+    setOpen(false);
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <CalendarPlus className="mr-2 h-4 w-4" />
-          Create Topic
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create New Topic</DialogTitle>
-          <DialogDescription>
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        <CalendarPlus className="mr-2 h-4 w-4" />
+        Create Topic
+      </Button>
+
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-in-out ${
+          open ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="bg-background border-t border-border rounded-t-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Create New Topic</h2>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              &times;
+            </Button>
+          </div>
+          <p className="text-muted-foreground mb-6">
             Fill in the details for your new topic. Click save when you're done.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleCreatePin}>
-        <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="topic-name" className="text-right">
-                Name
-              </Label>
+          </p>
+          <form onSubmit={handleCreateTopic} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="topic-name">Name</Label>
               <Input
                 id="topic-name"
                 value={topicName}
                 onChange={(e) => setTopicName(e.target.value)}
-                className="col-span-3"
                 placeholder="Enter topic name"
               />
             </div>
-            {/* Add a description field */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="topic-description" className="text-right">
-                Description
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="topic-description">Description</Label>
               <Input
                 id="topic-description"
                 value={topicDescription}
                 onChange={(e) => setTopicDescription(e.target.value)}
-                className="col-span-3"
                 placeholder="Enter topic description"
               />
             </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit">Save Topic</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <Button type="submit" className="w-full">
+              Save Topic
+            </Button>
+          </form>
+        </div>
+      </div>
+    </>
   );
 }
