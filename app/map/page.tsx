@@ -135,7 +135,7 @@ export default function Component() {
           setOpen={setIsCreateTopicModalOpen}
         />
 
-        <div className="absolute z-10 top-20 left-4 right-4">
+        {/* <div className="absolute z-10 top-20 left-4 right-4">
           <div className="relative">
             <Slider
               className="absolute"
@@ -144,7 +144,7 @@ export default function Component() {
               step={1}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Floating Action Button (FAB) for adding new events */}
         <div className="absolute right-4">
