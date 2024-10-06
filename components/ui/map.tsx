@@ -26,8 +26,8 @@ const containerStyle = {
 };
 
 const center = {
-  lat: 40.807384,
-  lng: -73.963036,
+  lat: 40.80793,
+  lng: -73.9654486,
 };
 
 const mapStyles = [
@@ -181,7 +181,6 @@ export default function Map({ pins }: { pins: any[] }) {
     setUserFirstName("");
     setUserLastName("");
   };
-
   return (
     <div className="h-screen">
       <LoadScript
@@ -190,8 +189,8 @@ export default function Map({ pins }: { pins: any[] }) {
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={{
-            lat: userLocation?.lat as number,
-            lng: userLocation?.lng as number,
+            lat: userLocation?.lat as number || center.lat,
+            lng: userLocation?.lng as number || center.lng,
           }}
           zoom={16}
           onLoad={onLoad}
@@ -211,9 +210,9 @@ export default function Map({ pins }: { pins: any[] }) {
             />
           ))}
 
-          {userLocation && mapRef.current && (
+          {mapRef.current && (
             <Marker
-              position={userLocation}
+              position={userLocation === null || userLocation === undefined ? center : userLocation}
               title="You are here"
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,
