@@ -17,7 +17,7 @@ interface Topic {
   // Add any other fields that exist in your topics table
 }
 
-export default function TopicSelector() {
+export default function TopicSelector({onSearch}: {onSearch: any}) {
   const [topics, setTopics] = useState<Topic[]>([])
   const [selectedTopics, setSelectedTopics] = useState<MultiValue<{ value: number; label: string }>>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -41,10 +41,9 @@ export default function TopicSelector() {
         setIsLoading(false)
       }
     }
-
     fetchTopics()
   }, [])
-
+  
   const handleChange = (selectedOptions: MultiValue<{ value: number; label: string }>) => {
     setSelectedTopics(selectedOptions)
     console.log("SELECTED TOPICS", selectedOptions)
@@ -63,33 +62,52 @@ export default function TopicSelector() {
     label: topic.name
   }))
 
-  async function handleSearchTopics(e: React.FormEvent){
-    console.log("CREATING NEW EVENT");
-    e.preventDefault();
-    console.log("Creating event:", {selectedTopics});
+//   async function handleSearchTopics(e: React.FormEvent){
+//     console.log("CREATING NEW EVENT");
+//     e.preventDefault();
+//     console.log("Creating event:", {selectedTopics});
 
-  const { data, error } = await supabase
-    .from('topics') // Replace with your actual table name
-    .select()
-    .in('id', selectedTopics.map(topic => topic.value));
+//   const { data, error } = await supabase
+//     .from('topics') // Replace with your actual table name
+//     .select()
+//     .in('id', selectedTopics.map(topic => topic.value));
 
-  if (error) {
-    console.error('Error queried event:', error);
-  } else {
-    console.log('Events queried:', data);
-  }
+//   if (error) {
+//     console.error('Error queried event:', error);
+//   } else {
+//     console.log('Events queried:', data);
+//   }
 
-    setTopics([]);
-  };
+//     setTopics([]);
+//   };
 
   const eventTypes = topics.map((topic: any) => ({
     value: topic.id,
     label: topic.name,
   }));
 
+  async function handleSubmit(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    console.log("SEARCHING TOPICS");
+    // e.preventDefault();
+    console.log("Found Topics:", {selectedTopics});
+
+  const { data, error } = await supabase
+    .from('pins') // Replace with your actual table name
+    .select()
+    .in('id', selectedTopics.map(topic => topic.value));
+
+  if (error) {
+    console.error('Error queried event:', error);
+  } else {
+    console.log('Events queried:', data); 
+  }
+    // Pass the results to the parent component via the onSearch prop
+    onSearch(data);
+  };
 
   return (
-    <form onSubmit={handleSearchTopics}>
+    <form onSubmit={handleSubmit}>
     <div className="w-full max-w-md mx-auto">
       <Select
         isMulti
@@ -105,14 +123,6 @@ export default function TopicSelector() {
       <Button type="submit">
                 Search
     </Button>
-      {/* <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">Selected Topics:</h3>
-        <ul className="list-disc pl-5">
-          {selectedTopics.map(topic => (
-            <li key={topic.value}>{topic.label}</li>
-          ))}
-        </ul>
-      </div> */}
     </div>
     </form>
   )

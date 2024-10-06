@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { createClient } from '@supabase/supabase-js';
+import { MultiValue } from 'react-select';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -80,20 +81,19 @@ const mapStyles = [
 ];
 
 
-const Map: React.FC = () => {
+export default function Map({pins}: {pins: any[]}) {
   const mapRef = useRef<google.maps.Map | null>(null);
-  const [pins, setPins] = useState<any[]>([]); // State to store pins
+  // const [pins, setPins] = useState<any[]>([]); // State to store pins
 
   const fetchPins = async () => {
-    // Fetching data from the "pins" table
-    const { data, error } = await supabase.from('pins').select('*');
-    if (error) {
-      console.error('Error fetching pins:', error);
-    } else {
-      setPins(data || []);
-    }
+    // const { data, error } = await supabase.from('pins').select('*').in('topic_id', selectedTopics.map(topic => topic.value));;
+    // if (error) {
+    //   console.error('Error fetching pins:', error);
+    // } else {
+    //   setPins(data || []);
+    // }
   };
-
+  console.log("MAP HAS "+JSON.stringify(pins))
   useEffect(() => {
     fetchPins(); // Fetch pins on component mount
   }, []);
@@ -116,7 +116,7 @@ const Map: React.FC = () => {
     backgroundColor: '#f5f2e9', // Matching the background color with the overall theme
     gestureHandling: "greedy"
   };
-
+  // fetchPins();
   return (
    <div className='h-screen'>
      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
@@ -142,6 +142,3 @@ const Map: React.FC = () => {
    </div>
   );
 };
-
-export default React.memo(Map);
-
