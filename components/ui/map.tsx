@@ -105,6 +105,7 @@ const Map: React.FC = () => {
     const [pins, setPins] = useState<any[]>([]); // State to store pins
     const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
     const [selectedPin, setSelectedPin] = useState<any>(null); // State to store selected pin
+    const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null); // State for user location
   
     const fetchPins = async () => {
       const { data, error } = await supabase.from('pins').select('*');
@@ -117,8 +118,26 @@ const Map: React.FC = () => {
   
     useEffect(() => {
       fetchPins(); // Fetch pins on component mount
+
+      // Get the user's location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            console.error("Error getting location: ", error);
+          }
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+      }
     }, []);
   
+    
     const onLoad = useCallback((map: google.maps.Map) => {
       mapRef.current = map;
     }, []);
@@ -166,6 +185,23 @@ const Map: React.FC = () => {
                 title={pin.name} // Optional: Set the name of the pin as the marker title
               />
             ))}
+
+             {/* Marker for user location */}
+          {userLocation && (
+            <Marker
+            position={userLocation}
+            title="You are here" // Optional title for user location marker
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 10, // Size of the circle (slightly larger)
+              fillColor: '#1A73E8', // Darker blue color
+              fillOpacity: 1,
+              strokeWeight: 4, // Wider white border
+              strokeColor: '#FFFFFF', // White border
+              }}
+            />
+          )}
+
           </GoogleMap>
         </LoadScript>
   
