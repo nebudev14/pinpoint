@@ -102,7 +102,7 @@ export default function Component() {
   return (
     <div className="flex flex-col h-screen">
       <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
-        <h1 className="text-xl font-bold">VICINITY</h1>
+        <h1 className="text-xl font-bold">PINPOINT</h1>
         <Button
           variant="ghost"
           size="icon"
