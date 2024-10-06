@@ -79,11 +79,7 @@ export default function Component() {
       gradient: "from-red-500 to-rose-500",
     },
     
-    {
-      icon: Dumbbell,
-      label: "Fitness",
-      gradient: "from-purple-500 to-pink-500",
-    },
+
   ];
 
   const trendingEvents = [
