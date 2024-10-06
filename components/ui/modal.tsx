@@ -70,10 +70,7 @@ export default function Modal({ isOpen, onClose, title, description, firstname, 
                   </div>
                   <div className="mt-4">
                     <p className="text-sm text-gray-700 font-sans">
-                      <span className="font-semibold">First Name:</span> {firstname}
-                    </p>
-                    <p className="text-sm text-gray-700 font-sans mt-1">
-                      <span className="font-semibold">Last Name:</span> {lastname}
+                      <span className="font-semibold">Created By:</span> {firstname + " " + lastname}
                     </p>
                   </div>
                 </div>
