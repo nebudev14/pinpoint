@@ -7,9 +7,11 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   description: string;
+  firstname: string;
+  lastname: string;
 }
 
-export default function Modal({ isOpen, onClose, title, description }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, description, firstname, lastname }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,6 +66,11 @@ export default function Modal({ isOpen, onClose, title, description }: ModalProp
                   <div className="mt-2">
                     <p className="text-base text-gray-500 font-light font-sans">
                       {description}
+                    </p>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-700 font-sans">
+                      <span className="font-semibold">Created By:</span> {firstname + " " + lastname}
                     </p>
                   </div>
                 </div>
