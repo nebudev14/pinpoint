@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { createClient } from '@supabase/supabase-js';
+import Modal from './modal'; // Import your Modal component
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -48,6 +49,15 @@ const mapStyles = [
       { color: '#ffffff' }, // White roads
     ],
   },
+
+  {
+    featureType: 'poi',
+    elementType: 'all',
+    stylers: [
+      { visibility: 'off' }, // Hides all points of interest
+    ],
+  },
+  
   {
     featureType: 'poi',
     elementType: 'geometry',
@@ -55,6 +65,16 @@ const mapStyles = [
       { visibility: 'off' }, // Hide points of interest
     ],
   },
+
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [
+      { color: '#e1f7d5' },
+      { visibility: 'on'}, // Set a different color for parks (light green)
+    ],
+  },
+
   {
     featureType: 'transit',
     elementType: 'geometry',
@@ -81,65 +101,83 @@ const mapStyles = [
 
 
 const Map: React.FC = () => {
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const [pins, setPins] = useState<any[]>([]); // State to store pins
-
-  const fetchPins = async () => {
-    // Fetching data from the "pins" table
-    const { data, error } = await supabase.from('pins').select('*');
-    if (error) {
-      console.error('Error fetching pins:', error);
-    } else {
-      setPins(data || []);
-    }
+    const mapRef = useRef<google.maps.Map | null>(null);
+    const [pins, setPins] = useState<any[]>([]); // State to store pins
+    const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
+    const [selectedPin, setSelectedPin] = useState<any>(null); // State to store selected pin
+  
+    const fetchPins = async () => {
+      const { data, error } = await supabase.from('pins').select('*');
+      if (error) {
+        console.error('Error fetching pins:', error);
+      } else {
+        setPins(data || []);
+      }
+    };
+  
+    useEffect(() => {
+      fetchPins(); // Fetch pins on component mount
+    }, []);
+  
+    const onLoad = useCallback((map: google.maps.Map) => {
+      mapRef.current = map;
+    }, []);
+  
+    const onUnmount = useCallback(() => {
+      mapRef.current = null;
+    }, []);
+  
+    const mapOptions: google.maps.MapOptions = {
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: true,
+      styles: mapStyles,
+      backgroundColor: '#f5f2e9',
+    };
+  
+    const handleMarkerClick = (pin: any) => {
+      setSelectedPin(pin); // Set the selected pin
+      setModalOpen(true); // Open the modal
+    };
+  
+    const closeModal = () => {
+      setModalOpen(false);
+      setSelectedPin(null); // Clear selected pin
+    };
+  
+    return (
+      <div className='h-screen'>
+        <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={16}
+            onLoad={onLoad}
+            onUnmount={onUnmount}
+            options={mapOptions}
+          >
+            {/* Render a marker for each pin */}
+            {pins.map(pin => (
+              <Marker
+                key={pin.id}
+                position={{ lat: pin.latitude, lng: pin.longitude }}
+                onClick={() => handleMarkerClick(pin)} // Set click handler
+                title={pin.name} // Optional: Set the name of the pin as the marker title
+              />
+            ))}
+          </GoogleMap>
+        </LoadScript>
+  
+        {/* Modal for displaying pin details */}
+        <Modal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          title={selectedPin?.name || ''}
+          description={selectedPin?.description || ''}
+        />
+      </div>
+    );
   };
-
-  useEffect(() => {
-    fetchPins(); // Fetch pins on component mount
-  }, []);
-
-  const onLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-    console.log('Map loaded!', map);
-  }, []);
-
-  const onUnmount = useCallback(() => {
-    mapRef.current = null;
-  }, []);
-
-  const mapOptions: google.maps.MapOptions = {
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    zoomControl: true,
-    styles: mapStyles,
-    backgroundColor: '#f5f2e9', // Matching the background color with the overall theme
-  };
-
-  return (
-   <div className='h-screen'>
-     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={center}
-        zoom={16}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        options={mapOptions}
-      >
-        {/* Render a marker for each pin */}
-        {pins.map(pin => (
-            <Marker
-              key={pin.id}
-              position={{ lat: pin.latitude, lng: pin.longitude }}
-              title={pin.name} // Optional: Set the name of the pin as the marker title
-            />
-          ))}
-      </GoogleMap>
-    </LoadScript>
-   </div>
-  );
-};
-
-export default React.memo(Map);
-
+  
+  export default React.memo(Map);
