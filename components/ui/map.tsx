@@ -3,10 +3,10 @@ import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { createClient } from '@supabase/supabase-js';
 import Modal from './modal'; // Import your Modal component
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 
 const containerStyle = {
@@ -150,9 +150,10 @@ const Map: React.FC = () => {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
-      zoomControl: true,
+      zoomControl: false,
       styles: mapStyles,
       backgroundColor: '#f5f2e9',
+      gestureHandling: 'greedy',
     };
   
     const handleMarkerClick = (pin: any) => {

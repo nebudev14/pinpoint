@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TopicSearch from '@/components/topic-search';
@@ -12,13 +12,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MapPin, Plus, Search, ChevronUp, Calendar, Clock } from "lucide-react";
+import {
+  MapPin,
+  Plus,
+  Search,
+  ChevronUp,
+  Calendar,
+  Clock,
+  FileText,
+} from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { motion, AnimatePresence } from "framer-motion";
+import CreateEventModal from "@/components/create-event-modal"; // Ensure this import is present
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  const [topics, setTopics] = useState<any[]>([]);
 
   // Mock data for upcoming events
   const upcomingEvents = [
@@ -45,11 +63,36 @@ export default function Component() {
     },
   ];
 
+  console.log(isCreateEventModalOpen)
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      const { data, error } = await supabase.from("topics").select();
+
+      if (error) {
+        console.error("Error fetching topics:", error);
+      } else {
+        const eventTypes = data.map((topic: any) => ({
+          value: topic.id,
+          label: topic.name,
+        }));
+
+        setTopics(eventTypes);
+      }
+    };
+
+    fetchTopics();
+  }, [setTopics]);
+
   return (
     <div className="flex flex-col h-screen">
       <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
         <h1 className="text-xl font-bold">Vicinity</h1>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCreateEventModalOpen(true)}
+        >
           <MapPin className="w-6 h-6" />
           <span className="sr-only">My Location</span>
         </Button>
@@ -65,40 +108,80 @@ export default function Component() {
           <Map />
         </div>
 
+        <CreateEventModal
+          topics={topics} // Ensure topics is defined or passed correctly
+          open={isCreateEventModalOpen}
+          setOpen={setIsCreateEventModalOpen}
+        />
+
         <div className="absolute z-10 top-20 left-4 right-4">
           <div className="relative">
-            <Slider className="absolute" defaultValue={[33]} max={100} step={1} />
+            <Slider
+              className="absolute"
+              defaultValue={[33]}
+              max={100}
+              step={1}
+            />
           </div>
         </div>
 
         {/* Floating Action Button (FAB) for adding new events */}
-        <div className="absolute bottom-16 right-4">
-          {isFabMenuOpen && (
-            <div className="mb-4 space-y-2">
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => console.log("Add Pin clicked")}
+        <div className="absolute right-4">
+          <div className="relative flex items-end justify-center h-screen pb-20">
+            <motion.div
+              className="relative"
+              initial={false}
+              animate={isFabMenuOpen ? "open" : "closed"}
+            >
+              <motion.div
+                className="flex flex-col items-center overflow-hidden rounded-full shadow-lg bg-primary text-primary-foreground"
+                variants={{
+                  open: { height: "auto" },
+                  closed: { height: 56 },
+                }}
               >
-                Add Pin
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => console.log("Add Topic clicked")}
-              >
-                Add Topic
-              </Button>
-            </div>
-          )}
-          <Button
+                <AnimatePresence>
+                  {isFabMenuOpen && (
+                    <motion.div
+                      className="flex flex-col py-2 space-y-2"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <button className="p-2 text-white bg-blue-500 rounded-full"
+                      onClick={() => setIsCreateEventModalOpen(!isCreateEventModalOpen)}>
+                        <MapPin size={20} />
+                      </button>
+                      <button className="p-2 text-white bg-green-500 rounded-full">
+                        <FileText size={20} />
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <motion.button
+                  className="flex items-center justify-center p-4 rounded-full bg-primary text-primary-foreground"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+                >
+                  <motion.div
+                    animate={{ rotate: isFabMenuOpen ? 225 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Plus size={24} />
+                  </motion.div>
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          </div>
+          {/* <Button
             className="rounded-full shadow-lg"
             size="icon"
             onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
           >
             <Plus className="w-6 h-6" />
             <span className="sr-only">Add New Event</span>
-          </Button>
+          </Button> */}
         </div>
 
         {/* Slide-up menu */}

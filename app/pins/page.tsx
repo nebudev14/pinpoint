@@ -12,7 +12,7 @@ export default async function Pins() {
   // return <pre>{JSON.stringify(pins, null, 2)}</pre>
   return (
     <div className='flex items-center justify-center h-screen'>
-      <CreateEventModal topics={topics} />
+      {/* <CreateEventModal topics={topics} /> */}
     </div>
   );
 }
