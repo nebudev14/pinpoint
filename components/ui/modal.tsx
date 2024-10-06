@@ -1,34 +1,36 @@
-import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+"use client"
+
+import React, { useEffect, useRef } from 'react'
+import { X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  description: string;
-  firstname: string;
-  lastname: string;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  description: string
+  firstname: string
+  lastname: string
 }
 
-export default function Modal({ isOpen, onClose, title, description, firstname, lastname }: ModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
+export default function Component({ isOpen, onClose, title, description, firstname, lastname }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
+      if (event.key === 'Escape') onClose()
+    }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'hidden'
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'visible';
-    };
-  }, [isOpen, onClose]);
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'visible'
+    }
+  }, [isOpen, onClose])
 
   return (
     <AnimatePresence>
@@ -50,7 +52,7 @@ export default function Modal({ isOpen, onClose, title, description, firstname, 
             className="w-full max-w-lg bg-white shadow-2xl rounded-t-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative p-6">
+            <div className="relative p-6 space-y-4">
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150"
@@ -58,27 +60,24 @@ export default function Modal({ isOpen, onClose, title, description, firstname, 
               >
                 <X className="h-5 w-5" />
               </button>
-              <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                  <h3 className="text-xl leading-6 font-bold text-gray-900 font-sans" id="modal-title">
-                    {title}
-                  </h3>
-                  <div className="mt-2">
-                    <p className="text-base text-gray-500 font-light font-sans">
-                      {description}
-                    </p>
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-700 font-sans">
-                      <span className="font-semibold">Created By:</span> {firstname + " " + lastname}
-                    </p>
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-gray-900 leading-tight" id="modal-title">
+                  {title}
+                </h3>
+                <p className="text-base text-gray-600 leading-relaxed">
+                  {description}
+                </p>
+              </div>
+              <div className="pt-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Created By:</span>{' '}
+                  <span className="text-gray-900">{firstname} {lastname}</span>
+                </p>
               </div>
             </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }
