@@ -38,6 +38,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CreatePinModal from "@/components/create-event-modal"; // Ensure this import is present
 import CreateTopicModal from "@/components/create-topic-modal";
 import DropdownSearch from "@/components/dropdown-search";
+import { useUser } from "@clerk/nextjs";
 
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,6 +52,10 @@ export default function Component() {
   const [topics, setTopics] = useState<any[]>([]);
   const [isCreateTopicModalOpen, setIsCreateTopicModalOpen] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
+  const [recEvent, setRecEvent] = useState<any>();
+  const [likedPins, setLikedPins] = useState<any[]>([]);
+
+  const { user } = useUser();
 
   // Mock data for each category
   const recommendedEvents = [
@@ -69,25 +74,6 @@ export default function Component() {
       date: "2023-09-20",
       time: "10:00 AM",
       color: "bg-purple-50",
-    },
-  ];
-
-  const upcomingEvents = [
-    {
-      id: 3,
-      title: "Music Festival",
-      location: "Austin, TX",
-      date: "2023-10-01",
-      time: "12:00 PM",
-      color: "bg-green-50",
-    },
-    {
-      id: 4,
-      title: "Food & Wine Expo",
-      location: "Chicago, IL",
-      date: "2023-10-05",
-      time: "11:00 AM",
-      color: "bg-yellow-50",
     },
   ];
 
@@ -112,6 +98,8 @@ export default function Component() {
 
   const [activeTab, setActiveTab] = useState("recommended");
 
+  console.log("liked pins");
+  console.log(likedPins.filter((pin) => pin.user_id === user?.id));
   const renderEvents = (events: any[]) => (
     <div className="space-y-4">
       {events.map((event: any) => (
@@ -176,13 +164,23 @@ export default function Component() {
       }
     };
 
+    const fetchLikedPins = async () => {
+      const { data, error } = await supabase.from("likes").select();
+
+      if (error) {
+        console.error("Error fetching liked pins:", error);
+      } else {
+        setLikedPins(data);
+      }
+    };
+
     fetchPins();
     fetchTopics();
+    fetchLikedPins();
   }, [setTopics]);
 
-  console.log("EVENTS");
-  console.log(events);
-
+  console.log("REC EVENT");
+  console.log(recEvent);
   return (
     <div className="flex flex-col h-screen">
       <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-primary text-primary-foreground">
@@ -276,7 +274,9 @@ export default function Component() {
                 <motion.button
                   className="flex items-center justify-center p-4 rounded-full bg-primary text-primary-foreground"
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+                  onClick={async () => {
+                    setIsFabMenuOpen(!isFabMenuOpen);
+                  }}
                 >
                   <motion.div
                     animate={{ rotate: isFabMenuOpen ? 225 : 0 }}
@@ -306,7 +306,26 @@ export default function Component() {
         >
           <div
             className="flex justify-center p-2 cursor-pointer"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={async () => {
+              setIsMenuOpen(!isMenuOpen);
+              console.log("made request for refc");
+              const response = await fetch("/api/rec", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  eventHistory: likedPins.filter(
+                    (pin) => pin.user_id === user?.id
+                  ),
+                  allEvents: events,
+                }),
+              });
+              const data = await response.json();
+              setRecEvent(JSON.parse(data));
+              console.log("RECEIVED RECOMMENDATION");
+              console.log(data);
+            }}
           >
             <ChevronUp
               className={`h-6 w-6 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : ""}`}
@@ -339,7 +358,23 @@ export default function Component() {
                       <Sparkles className="w-5 h-5 mr-2" />
                       Recommended for you
                     </h2>
-                    {renderEvents(recommendedEvents)}
+                    {/* {renderEvents(recommendedEvents)} */}
+                    <h1 className="mb-3">
+                      {recEvent?.event.reason}
+                    </h1>
+                    {recEvent !== undefined ? (
+                      renderEvents([
+                        {
+                          title: recEvent?.event.name,
+                          location: recEvent?.event.location,
+                          date: recEvent?.event.date,
+                          time: recEvent?.event.time,
+                          color: "bg-purple-50",
+                        },
+                      ])
+                    ) : (
+                      <h1>Loading...</h1>
+                    )}
                   </TabsContent>
                   <TabsContent value="upcoming">
                     <h2 className="mb-4 text-xl font-bold flex items-center">
