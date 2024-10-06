@@ -153,7 +153,7 @@ export default function CreatePinModal({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pin-type">Type</Label>
+            <Label htmlFor="pin-type">Topic</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -167,13 +167,13 @@ export default function CreatePinModal({
                   {pinType
                     ? topics?.find((type: any) => type?.value === pinType)
                         ?.label
-                    : "Select pin type"}
+                    : "Select pin topic"}
                   <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search pin type..." />
+                  <CommandInput placeholder="Search pin topic..." />
                   <CommandEmpty>No pin category found.</CommandEmpty>
                   <CommandList>
                     {topics?.map((type: any) => (
