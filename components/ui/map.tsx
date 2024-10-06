@@ -1,88 +1,80 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { createClient } from '@supabase/supabase-js';
-import Modal from './modal'; // Import your Modal component
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { createClient } from "@supabase/supabase-js";
+import Modal from "./modal"; // Import your Modal component
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const containerStyle = {
-  width: '100%',
-  height: '100%'
+const iconMappings = {
+  1: "/assets/bathroom.svg",
+  2: "/assets/wheelchair.svg",
+  3: "/assets/police.svg",
+  5: "/assets/food.svg",
+  6: "/assets/gym.svg",
+  8: "/assets/world.svg",
+  9: "/assets/wifi.svg",
+  10: "/assets/water.svg",
+  12: "/assets/book.svg",
 };
 
-const center = {
-  lat: 40.807384,
-  lng: -73.963036,
+const containerStyle = {
+  width: "100%",
+  height: "100%",
+};
+
+const initCenter = {
+  lat: 40.80793,
+  lng: -73.9654486,
 };
 
 const mapStyles = [
   {
-    featureType: 'all',
-    elementType: 'geometry',
-    stylers: [
-      { color: '#f5f2e9' },
-    ],
+    featureType: "all",
+    elementType: "geometry",
+    stylers: [{ color: "#f5f2e9" }],
   },
   {
-    featureType: 'water',
-    elementType: 'geometry',
-    stylers: [
-      { color: '#b2e0ff' },
-    ],
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#b2e0ff" }],
   },
   {
-    featureType: 'landscape',
-    elementType: 'geometry',
-    stylers: [
-      { color: '#f7f2e6' },
-    ],
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [{ color: "#f7f2e6" }],
   },
   {
-    featureType: 'road',
-    elementType: 'geometry',
-    stylers: [
-      { color: '#ffffff' },
-    ],
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#ffffff" }],
   },
   {
-    featureType: 'poi',
-    elementType: 'all',
-    stylers: [
-      { visibility: 'off' },
-    ],
+    featureType: "poi",
+    elementType: "all",
+    stylers: [{ visibility: "off" }],
   },
   {
-    featureType: 'poi.park',
-    elementType: 'geometry',
-    stylers: [
-      { color: '#e1f7d5' },
-      { visibility: 'on' },
-    ],
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#e1f7d5" }, { visibility: "on" }],
   },
   {
-    featureType: 'transit',
-    elementType: 'geometry',
-    stylers: [
-      { color: '#f5f2e5' },
-    ],
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [{ color: "#f5f2e5" }],
   },
   {
-    featureType: 'all',
-    elementType: 'labels.text.fill',
-    stylers: [
-      { color: '#7b6f5c' },
-    ],
+    featureType: "all",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#7b6f5c" }],
   },
   {
-    featureType: 'all',
-    elementType: 'labels.text.stroke',
-    stylers: [
-      { color: '#ffffff' },
-      { weight: 2 },
-    ],
+    featureType: "all",
+    elementType: "labels.text.stroke",
+    stylers: [{ color: "#ffffff" }, { weight: 2 }],
   },
 ];
 
@@ -90,9 +82,12 @@ export default function Map({ pins }: { pins: any[] }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPin, setSelectedPin] = useState<any>(null);
-  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
-  const [userFirstName, setUserFirstName] = useState<string>('');
-  const [userLastName, setUserLastName] = useState<string>('');
+  const [userLocation, setUserLocation] =
+    useState<google.maps.LatLngLiteral | null>(null);
+  const [userFirstName, setUserFirstName] = useState<string>("");
+  const [userLastName, setUserLastName] = useState<string>("");
+
+  const [center, setCenter] = useState<google.maps.LatLngLiteral>(initCenter);
   const [selectedPinLikes, setSelectedPinLikes] = useState<number>(0);
 
   const fetchPins = async () => {
@@ -116,6 +111,10 @@ export default function Map({ pins }: { pins: any[] }) {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          setCenter({
+            lat: position.coords.latitude || initCenter.lat,
+            lng: position.coords.longitude || initCenter.lng,
+          });
         },
         (error) => {
           console.error("Error getting location: ", error);
@@ -126,26 +125,29 @@ export default function Map({ pins }: { pins: any[] }) {
     }
   }, []);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
+  const onLoad = useCallback(
+    (map: google.maps.Map) => {
+      mapRef.current = map;
 
-    // Ensure google object is defined before using it
-    if (userLocation && google) {
-      new google.maps.Marker({
-        position: userLocation,
-        map: map,
-        title: "You are here",
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: '#1A73E8',
-          fillOpacity: 1,
-          strokeWeight: 4,
-          strokeColor: '#FFFFFF',
-        },
-      });
-    }
-  }, [userLocation]);
+      // Ensure google object is defined before using it
+      if (userLocation && google) {
+        new google.maps.Marker({
+          position: userLocation,
+          map: map,
+          title: "You are here",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#1A73E8",
+            fillOpacity: 1,
+            strokeWeight: 4,
+            strokeColor: "#FFFFFF",
+          },
+        });
+      }
+    },
+    [userLocation]
+  );
 
   const onUnmount = useCallback(() => {
     mapRef.current = null;
@@ -157,13 +159,14 @@ export default function Map({ pins }: { pins: any[] }) {
     fullscreenControl: false,
     zoomControl: false,
     styles: mapStyles,
-    backgroundColor: '#f5f2e9',
-    gestureHandling: 'greedy',
+    backgroundColor: "#f5f2e9",
+    gestureHandling: "greedy",
   };
 
   const handleMarkerClick = async (pin: any) => {
     setSelectedPin(pin);
     setModalOpen(true);
+    setCenter({ lat: pin.latitude, lng: pin.longitude })
 
     // Fetch user data
     const { data: userData, error: userError } = await supabase
@@ -214,13 +217,14 @@ export default function Map({ pins }: { pins: any[] }) {
   const closeModal = () => {
     setModalOpen(false);
     setSelectedPin(null);
-    setUserFirstName('');
-    setUserLastName('');
+    setUserFirstName("");
+    setUserLastName("");
   };
-
   return (
-    <div className='h-screen'>
-      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+    <div className="h-screen">
+      <LoadScript
+        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+      >
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={center}
@@ -229,26 +233,30 @@ export default function Map({ pins }: { pins: any[] }) {
           onUnmount={onUnmount}
           options={mapOptions}
         >
-          {pins.map(pin => (
+          {pins.map((pin) => (
             <Marker
               key={pin.id}
               position={{ lat: pin.latitude, lng: pin.longitude }}
               onClick={() => handleMarkerClick(pin)}
               title={pin.name}
+              icon={{
+                url: iconMappings[pin.topic_id as keyof typeof iconMappings],
+                scaledSize: new google.maps.Size(30, 30),
+              }}
             />
           ))}
 
-          {userLocation && mapRef.current && (
+          {mapRef.current && (
             <Marker
-              position={userLocation}
+              position={userLocation === null || userLocation === undefined ? initCenter : userLocation}
               title="You are here"
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 10,
-                fillColor: '#1A73E8',
+                fillColor: "#1A73E8",
                 fillOpacity: 1,
                 strokeWeight: 4,
-                strokeColor: '#FFFFFF',
+                strokeColor: "#FFFFFF",
               }}
             />
           )}
@@ -258,8 +266,8 @@ export default function Map({ pins }: { pins: any[] }) {
       <Modal
         isOpen={modalOpen}
         onClose={closeModal}
-        title={selectedPin?.name || ''}
-        description={selectedPin?.description || ''}
+        title={selectedPin?.name || ""}
+        description={selectedPin?.description || ""}
         firstname={userFirstName}
         lastname={userLastName}
         like_count={selectedPinLikes}

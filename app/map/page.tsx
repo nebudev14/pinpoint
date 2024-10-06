@@ -33,6 +33,7 @@ const supabase = createClient(
 import { motion, AnimatePresence } from "framer-motion";
 import CreatePinModal from "@/components/create-event-modal"; // Ensure this import is present
 import CreateTopicModal from "@/components/create-topic-modal";
+import DropdownSearch from "@/components/dropdown-search";
 
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -114,6 +115,7 @@ export default function Component() {
       <div className="absolute z-10 top-20 left-4 right-4">
         <div className="relative">
           <TopicSearch onSearch={handleSearchTopics} />
+          {/* <DropdownSearch /> */}
         </div>
       </div>
       <main className="relative flex-1">
