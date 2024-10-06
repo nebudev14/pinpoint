@@ -21,11 +21,26 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { CommandList } from "cmdk";
 import { cn } from "@/utils/cn";
 import { useUser } from "@clerk/nextjs";
+import {
+  GoogleMap,
+  LoadScript,
+  Marker,
+  useLoadScript,
+} from "@react-google-maps/api";
+import Map from "./ui/map";
 
-export default function CreatePinModal({ topics, open, setOpen }: { topics: any, open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
+export default function CreatePinModal({
+  topics,
+  open,
+  setOpen,
+}: {
+  topics: any;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   const center = {
@@ -35,37 +50,58 @@ export default function CreatePinModal({ topics, open, setOpen }: { topics: any,
 
   const [pinName, setPinName] = useState("");
   const [pinType, setPinType] = useState("");
-  const [pinDescription, setPinDescription] = useState(""); 
+  const [pinDescription, setPinDescription] = useState("");
   const [location, setLocation] = useState(center);
 
   const { user } = useUser();
 
-  async function handleCreatePin(e: React.FormEvent){
-    e.preventDefault();
-    console.log("Creating pin:", {
-      name: pinName,
-      type: pinType,
-      description: pinDescription,
-      location,
-    });
+  const mapRef = useRef(null);
 
-    const { data, error } = await supabase
-      .from('pins')
-      .insert([
-        {
-          name: pinName,
-          description: pinDescription,
-          topic_id: pinType,
-          latitude: location.lat,
-          longitude: location.lng,
-          user_id: user?.id,
-        }
-      ]);
+  const mapContainerStyle = {
+    width: "100%",
+    height: "400px",
+  };
+
+  const onMapLoad = useCallback((map: any) => {
+    mapRef.current = map;
+  }, []);
+
+  const onMapClick = useCallback((e: any) => {
+    setLocation({
+      lat: e.latLng.lat(),
+      lng: e.latLng.lng(),
+    });
+  }, []);
+
+  async function handleCreatePin(e: React.FormEvent) {
+    e.preventDefault();
+    console.log("Creating pin:",  {
+      name: pinName,
+      description: pinDescription,
+      topic_id: pinType,
+      latitude: location.lat,
+      longitude: location.lng,
+      user_id: user?.id,
+    },);
+
+    
+
+    const { data, error } = await supabase.from("pins").insert([
+      {
+        name: pinName,
+        description: pinDescription,
+        topic_id: pinType,
+        latitude: location.lat,
+        longitude: location.lng,
+        user_id: user?.id,
+      },
+    ]);
 
     if (error) {
-      console.error('Error adding pin:', error);
+      console.error("Error adding pin:", error);
     } else {
-      console.log('Pin added successfully:', data);
+      console.log("Pin added successfully:", data);
+      console.log(error)
     }
 
     setPinName("");
@@ -73,12 +109,18 @@ export default function CreatePinModal({ topics, open, setOpen }: { topics: any,
     setPinDescription("");
     setLocation(center);
     setOpen(false);
-  };
+  }
+
+  // const { isLoaded, loadError } = useLoadScript({
+  //   id: `google-map`,
+  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+  //   libraries: ["places"],
+  // });
 
   return (
     <div
       className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-in-out ${
-        open ? 'translate-y-0' : 'translate-y-full'
+        open ? "translate-y-0" : "translate-y-full"
       }`}
     >
       <div className="bg-background border-t border-border rounded-t-xl shadow-lg p-6 max-h-[90vh] overflow-y-auto">
@@ -89,7 +131,8 @@ export default function CreatePinModal({ topics, open, setOpen }: { topics: any,
           </Button>
         </div>
         <p className="text-muted-foreground mb-6">
-          Enter the details for your new pin and select its location on the map. Click create when you're done.
+          Enter the details for your new pin and select its location on the map.
+          Click create when you're done.
         </p>
         <form onSubmit={handleCreatePin} className="space-y-4">
           <div className="space-y-2">
@@ -157,6 +200,13 @@ export default function CreatePinModal({ topics, open, setOpen }: { topics: any,
               onChange={(e) => setPinDescription(e.target.value)}
               placeholder="Enter pin description"
             />
+          </div>
+          <Label className="text-right mt-2">Location</Label>
+          <div className=" items-center ">
+            
+            <div className="w-full">
+              <Map pins={[]} style={mapContainerStyle} onMapClick={onMapClick} location={location} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Coordinates</Label>
