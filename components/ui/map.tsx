@@ -15,8 +15,8 @@ const containerStyle = {
 };
 
 const center = {
-  lat: 40.73061,
-  lng: -73.935242,
+  lat: 40.807384,
+  lng: -73.963036,
 };
 
 // Updated map styles to hide points of interest
