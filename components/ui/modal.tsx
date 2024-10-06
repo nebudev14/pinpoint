@@ -19,15 +19,19 @@ interface ModalProps {
   firstname: string
   lastname: string
   like_count: number
-  pin_id: number
+  pin_id: number,
+  event_name: string,
+  event_desc: string,
 }
 
-export default function Component({ isOpen, onClose, title, description, firstname, lastname, like_count, pin_id }: ModalProps) {
+export default function Component({ isOpen, onClose, title, description, firstname, lastname, like_count, pin_id, event_name, event_desc }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const { user } = useUser()
   const [likes, setLikes] = useState(like_count)
   const [voted, setVoted] = useState<'up' | 'down' | null>(null)
 
+
+  console.log(user)
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
@@ -49,10 +53,28 @@ export default function Component({ isOpen, onClose, title, description, firstna
       // Deselect the current vote
       setVoted(null)
       setLikes(like_count)
+      console.log("down")
+      const { data, error } = await supabase.from("likes").delete().eq("user_id", user?.id).eq("pin_id", pin_id)
+      console.log(data, error)
     } else {
       // Change vote or vote for the first time
       setVoted(voteType)
       setLikes(prevLikes => voteType === 'up' ? like_count + 1 : like_count - 1)
+      console.log({
+        user_id: user?.id,
+        pin_id,
+        vote_type: voteType === 'up' ? 1 : 0,
+        event_name: event_name,
+        event_desc: event_desc,
+      })
+      const { data, error } = await supabase.from("likes").insert({
+        user_id: user?.id,
+        pin_id,
+        vote_type: voteType === 'up' ? 1 : 0,
+        event_name: event_name,
+        event_desc: event_desc,
+      })
+      console.log(data, error)
     }
 
     // Here you would typically update the vote in your database

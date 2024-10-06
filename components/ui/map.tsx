@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { createClient } from "@supabase/supabase-js";
 import Modal from "./modal"; // Import your Modal component
+import { useRouter } from "next/router";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -289,6 +290,8 @@ export default function Map({
         lastname={userLastName}
         like_count={selectedPinLikes}
         pin_id={selectedPin?.id}
+        event_name={selectedPin?.name}
+        event_desc={selectedPin?.description}
       />
     </div>
   );

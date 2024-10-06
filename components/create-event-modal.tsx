@@ -30,6 +30,7 @@ import {
 import Map from "./ui/map";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useRouter } from "next/navigation";
 
 export default function CreatePinModal({
   topics,
@@ -114,6 +115,7 @@ export default function CreatePinModal({
     setPinDescription("");
     setLocation(center);
     setOpen(false);
+    router.refresh();
   }
 
   // const { isLoaded, loadError } = useLoadScript({
@@ -121,6 +123,8 @@ export default function CreatePinModal({
   //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
   //   libraries: ["places"],
   // });
+
+  const router = useRouter();
 
   return (
     <div
