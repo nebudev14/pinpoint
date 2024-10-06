@@ -17,6 +17,7 @@ const iconMappings = {
   8: "/assets/world.svg",
   9: "/assets/wifi.svg",
   10: "/assets/water.svg",
+  11: "/assets/farmers-market.svg",
   12: "/assets/book.svg",
 };
 
