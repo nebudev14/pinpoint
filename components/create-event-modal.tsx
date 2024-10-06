@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,7 @@ import { useCallback, useRef } from "react";
 import { cn } from "@/utils/cn";
 import { useUser } from "@clerk/nextjs";
 
-export default function CreateEventModal({ topics }: { topics: any }) {
+export default function CreateEventModal({ topics, open, setOpen }: { topics: any, open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -49,16 +49,15 @@ export default function CreateEventModal({ topics }: { topics: any }) {
     lng: -74.006,
   };
 
-  const [open, setOpen] = useState(false);
   const [eventName, setEventName] = useState("");
   const [eventType, setEventType] = useState("");
   const [eventDescription, setEventDescription] = useState(""); 
   const [location, setLocation] = useState(center);
 
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!, // Replace with your actual API key
-  });
+  // const { isLoaded } = useJsApiLoader({
+  //   id: "google-map-script",
+  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!, // Replace with your actual API key
+  // });
 
   const mapRef = useRef(null);
 
@@ -108,13 +107,9 @@ export default function CreateEventModal({ topics }: { topics: any }) {
     setOpen(false);
   };
 
-  const eventTypes = topics.map((topic: any) => ({
-    value: topic.id,
-    label: topic.name,
-  }));
 
   const { user } = useUser();
-  console.log(user?.id);
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -131,7 +126,7 @@ export default function CreateEventModal({ topics }: { topics: any }) {
         </DialogHeader>
           <form onSubmit={handleCreateEvent}>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid items-center grid-cols-4 gap-4">
                 <Label htmlFor="event-name" className="text-right">
                   Name
                 </Label>
@@ -142,7 +137,7 @@ export default function CreateEventModal({ topics }: { topics: any }) {
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid items-center grid-cols-4 gap-4">
                 <Label htmlFor="event-type" className="text-right">
                   Type
                 </Label>
@@ -157,10 +152,10 @@ export default function CreateEventModal({ topics }: { topics: any }) {
                       )}
                     >
                       {eventType
-                        ? eventTypes.find((type: any) => type.value === eventType)
+                        ? topics?.find((type: any) => type?.value === eventType)
                             ?.label
                         : "Select event type"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[300px] p-0">
@@ -168,24 +163,24 @@ export default function CreateEventModal({ topics }: { topics: any }) {
                       <CommandInput placeholder="Search event type..." />
                       <CommandEmpty>No event type found.</CommandEmpty>
                       <CommandList>
-                        {eventTypes.map((type: any) => (
+                        {topics?.map((type: any) => (
                           <CommandItem
-                            key={type.value}
+                            key={type?.value}
                             onSelect={() => {
                               setEventType(
-                                type.value === eventType ? "" : type.value
+                                type?.value === eventType ? "" : type?.value
                               );
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                eventType === type.value
+                                eventType === type?.value
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
                             />
-                            {type.label}
+                            {type?.label}
                           </CommandItem>
                         ))}
                       </CommandList>
@@ -194,7 +189,7 @@ export default function CreateEventModal({ topics }: { topics: any }) {
                 </Popover>
               </div>
               {/* Add a description field */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid items-center grid-cols-4 gap-4">
               <Label htmlFor="topic-description" className="text-right">
                 Description
               </Label>
@@ -206,9 +201,9 @@ export default function CreateEventModal({ topics }: { topics: any }) {
                 placeholder="Enter event description"
               />
             </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid items-center grid-cols-4 gap-4">
                 <Label className="text-right">Location</Label>
-                <div className="col-span-3">
+                {/* <div className="col-span-3">
                   {isLoaded ? (
                     <GoogleMap
                       mapContainerStyle={mapContainerStyle}
@@ -222,9 +217,9 @@ export default function CreateEventModal({ topics }: { topics: any }) {
                   ) : (
                     <div>Loading map...</div>
                   )}
-                </div>
+                </div> */}
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid items-center grid-cols-4 gap-4">
                 <Label className="text-right">Coordinates</Label>
                 <div className="col-span-3">
                   Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
