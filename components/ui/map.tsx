@@ -137,14 +137,14 @@ const Map: React.FC = () => {
     };
   
     const handleMarkerClick = (pin: any) => {
-      setSelectedPin(pin); // Set the selected pin
-      setModalOpen(true); // Open the modal
-    };
-  
-    const closeModal = () => {
-      setModalOpen(false);
-      setSelectedPin(null); // Clear selected pin
-    };
+        setSelectedPin(pin);
+        setModalOpen(true);
+      };
+    
+      const closeModal = () => {
+        setModalOpen(false);
+        setSelectedPin(null);
+      };
   
     return (
       <div className='h-screen'>
