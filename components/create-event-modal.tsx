@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { CommandList } from "cmdk";
 import { cn } from "@/utils/cn";
 import { useUser } from "@clerk/nextjs";
@@ -28,6 +28,8 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import Map from "./ui/map";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function CreatePinModal({
   topics,
@@ -52,6 +54,7 @@ export default function CreatePinModal({
   const [pinType, setPinType] = useState("");
   const [pinDescription, setPinDescription] = useState("");
   const [location, setLocation] = useState(center);
+  const [dateTime, setDateTime] = useState<Date | null>(null);
 
   const { user } = useUser();
 
@@ -82,6 +85,7 @@ export default function CreatePinModal({
       latitude: location.lat,
       longitude: location.lng,
       user_id: user?.id,
+      date: dateTime?.toISOString()
     },);
 
     
@@ -94,6 +98,7 @@ export default function CreatePinModal({
         latitude: location.lat,
         longitude: location.lng,
         user_id: user?.id,
+        datetime: dateTime?.toISOString()
       },
     ]);
 
@@ -200,6 +205,34 @@ export default function CreatePinModal({
               onChange={(e) => setPinDescription(e.target.value)}
               placeholder="Enter pin description"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pin-date-time">Date and Time</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dateTime && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateTime ? dateTime.toLocaleString() : "Select date and time"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <DatePicker
+                  selected={dateTime}
+                  onChange={(date) => setDateTime(date)}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  inline
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           <Label className="text-right mt-2">Location</Label>
           <div className=" items-center ">
