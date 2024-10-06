@@ -8,6 +8,18 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const iconMappings = {
+  1: "/assets/bathroom.svg",
+  2: "/assets/wheelchair.svg",
+  3: "/assets/police.svg",
+  5: "/assets/food.svg",
+  6: "/assets/gym.svg",
+  8: "/assets/world.svg",
+  9: "/assets/wifi.svg",
+  10: "/assets/water.svg",
+  12: "/assets/book.svg",
+};
+
 const containerStyle = {
   width: "100%",
   height: "100%",
@@ -84,8 +96,6 @@ export default function Map({ pins }: { pins: any[] }) {
     //   setPins(data || []);
     // }
   };
-
-  
 
   useEffect(() => {
     fetchPins(); // Fetch pins on component mount
@@ -172,7 +182,6 @@ export default function Map({ pins }: { pins: any[] }) {
     setUserLastName("");
   };
 
-
   return (
     <div className="h-screen">
       <LoadScript
@@ -180,7 +189,10 @@ export default function Map({ pins }: { pins: any[] }) {
       >
         <GoogleMap
           mapContainerStyle={containerStyle}
-          center={{ lat: userLocation?.lat as number, lng: userLocation?.lng as number  }}
+          center={{
+            lat: userLocation?.lat as number,
+            lng: userLocation?.lng as number,
+          }}
           zoom={16}
           onLoad={onLoad}
           onUnmount={onUnmount}
@@ -193,7 +205,7 @@ export default function Map({ pins }: { pins: any[] }) {
               onClick={() => handleMarkerClick(pin)}
               title={pin.name}
               icon={{
-                url: "/assets/bathroom.svg",
+                url: iconMappings[pin.topic_id as keyof typeof iconMappings],
                 scaledSize: new google.maps.Size(30, 30),
               }}
             />
