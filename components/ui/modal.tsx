@@ -1,15 +1,15 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react'
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 import { X, ThumbsUp, ThumbsDown, MessageSquare, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 interface ModalProps {
   isOpen: boolean
@@ -17,22 +17,18 @@ interface ModalProps {
   title: string
   description: string
   firstname: string
-  lastname: string,
-  like_count: number,
+  lastname: string
+  like_count: number
   pin_id: number
 }
 
 export default function Component({ isOpen, onClose, title, description, firstname, lastname, like_count, pin_id }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
-  const { user } = useUser();
-  const [likes, setLikes] = useState(like_count);
-  const [liked, setLiked] = useState(false);
-  const [disliked, setDisliked] = useState(false);
+  const { user } = useUser()
+  const [likes, setLikes] = useState(like_count)
+  const [voted, setVoted] = useState<'up' | 'down' | null>(null)
 
   useEffect(() => {
-    // setLiked(
-
-    // )
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
@@ -48,38 +44,31 @@ export default function Component({ isOpen, onClose, title, description, firstna
     }
   }, [isOpen, onClose])
 
-
-  const handleUpvote = async () => {
-    setLikes((prevLikes) => prevLikes + 1);
-    console.log("LIKED, TOTAL LIKES " + likes)
-    const { data: liked, error: likeError } = await supabase
-      .from('likes')
-      .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
-      .eq('pin_id', pin_id);
-
-    if (likeError) {
-      console.error(likeError);
+  const handleVote = async (voteType: 'up' | 'down') => {
+    if (voted === voteType) {
+      // Deselect the current vote
+      setVoted(null)
+      setLikes(like_count)
+    } else {
+      // Change vote or vote for the first time
+      setVoted(voteType)
+      setLikes(prevLikes => voteType === 'up' ? like_count + 1 : like_count - 1)
     }
-  };
 
-  const handleDownvote = async () => {
-    try {
-      // Remove the like from the database
-      const { data, error } = await supabase
-        .from('likes')
-        .delete()
-        .match({ user_id: user?.id, pin_id: pin_id });
+    // Here you would typically update the vote in your database
+    // For example:
+    // await supabase.from('votes').upsert({ user_id: user?.id, pin_id, vote_type: voteType })
+  }
 
-      if (error) {
-        console.error('Error downvoting', error);
-      } else {
-        // Decrease the local like count by 1
-        setLikes((prevLikes) => Math.max(prevLikes - 1, 0));
-      }
-    } catch (error) {
-      console.error('Error downvoting', error);
-    }
-  };
+  const handleComment = () => {
+    // Implement comment functionality
+    console.log('Comment clicked')
+  }
+
+  const handleShare = () => {
+    // Implement share functionality
+    console.log('Share clicked')
+  }
 
   return (
     <AnimatePresence>
@@ -88,15 +77,16 @@ export default function Component({ isOpen, onClose, title, description, firstna
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-x-0 bottom-0 z-50 flex justify-center items-end p-4 sm:p-6"
+          className="fixed inset-0 z-50 flex justify-center items-end bg-black bg-opacity-50 p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
           onClick={onClose}
         >
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
+            ref={modalRef}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="w-full max-w-lg bg-white shadow-2xl rounded-t-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
@@ -122,6 +112,33 @@ export default function Component({ isOpen, onClose, title, description, firstna
                   <span className="font-semibold">Created By:</span>{' '}
                   <span className="text-gray-900">{firstname} {lastname}</span>
                 </p>
+              </div>
+              <div className="flex items-center justify-between pt-4">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleVote('up')}
+                    className={`p-2 rounded-full ${voted === 'up' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                    aria-label="Upvote"
+                  >
+                    <ThumbsUp className="h-5 w-5" />
+                  </button>
+                  <span className="font-semibold text-lg" aria-live="polite">{likes}</span>
+                  <button
+                    onClick={() => handleVote('down')}
+                    className={`p-2 rounded-full ${voted === 'down' ? 'bg-red-100 text-red-600' : 'hover:bg-gray-100'}`}
+                    aria-label="Downvote"
+                  >
+                    <ThumbsDown className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button onClick={handleComment} className="p-2 rounded-full hover:bg-gray-100" aria-label="Comment">
+                    <MessageSquare className="h-5 w-5" />
+                  </button>
+                  <button onClick={handleShare} className="p-2 rounded-full hover:bg-gray-100" aria-label="Share">
+                    <Share2 className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
