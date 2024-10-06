@@ -1,8 +1,15 @@
 "use client"
 
-import React, { useEffect, useRef } from 'react'
-import { X } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { createClient } from '@supabase/supabase-js';
+import { X, ThumbsUp, ThumbsDown, MessageSquare, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useUser } from "@clerk/nextjs";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface ModalProps {
   isOpen: boolean
@@ -10,13 +17,22 @@ interface ModalProps {
   title: string
   description: string
   firstname: string
-  lastname: string
+  lastname: string,
+  like_count: number,
+  pin_id: number
 }
 
-export default function Component({ isOpen, onClose, title, description, firstname, lastname }: ModalProps) {
+export default function Component({ isOpen, onClose, title, description, firstname, lastname, like_count, pin_id }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
+  const { user } = useUser();
+  const [likes, setLikes] = useState(like_count);
+  const [liked, setLiked] = useState(false);
+  const [disliked, setDisliked] = useState(false);
 
   useEffect(() => {
+    setLiked(
+
+    )
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
@@ -31,6 +47,39 @@ export default function Component({ isOpen, onClose, title, description, firstna
       document.body.style.overflow = 'visible'
     }
   }, [isOpen, onClose])
+
+
+  const handleUpvote = async () => {
+    setLikes((prevLikes) => prevLikes + 1);
+    console.log("LIKED, TOTAL LIKES " + likes)
+    const { liked: liked, error: likeError } = await supabase
+      .from('likes')
+      .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
+      .eq('pin_id', pin.id);
+
+    if (likeError) {
+      console.error(likeError);
+    }
+  };
+
+  const handleDownvote = async () => {
+    try {
+      // Remove the like from the database
+      const { data, error } = await supabase
+        .from('likes')
+        .delete()
+        .match({ user_id: user?.id, pin_id: pin_id });
+
+      if (error) {
+        console.error('Error downvoting', error);
+      } else {
+        // Decrease the local like count by 1
+        setLikes((prevLikes) => Math.max(prevLikes - 1, 0));
+      }
+    } catch (error) {
+      console.error('Error downvoting', error);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -75,6 +124,31 @@ export default function Component({ isOpen, onClose, title, description, firstna
                 </p>
               </div>
             </div>
+
+            {/* New section for upvote/downvote, comments, and share buttons */}
+            <div className="flex justify-around items-center py-4 bg-gray-100 border-t border-gray-200">
+              <div className="flex items-center space-x-1"> {/* Adjusted space-x-1 for closer spacing */}
+                <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 focus:outline-none"
+                  onClick={handleUpvote}>
+                  <ThumbsUp className="w-5 h-5" />
+                </button>
+                <span>{like_count}</span> {/* Move like_count into the flex container */}
+                <button className="flex items-center space-x-1.5 text-gray-700 hover:text-red-600 focus:outline-none"
+                  onClick={handleDownvote}>
+                  <ThumbsDown className="w-5 h-5" />
+                </button>
+              </div>
+              <button className="flex items-center space-x-2 text-gray-700 hover:text-green-600 focus:outline-none">
+                <MessageSquare className="w-5 h-5" />
+                <span>0</span>
+              </button>
+              <button className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 focus:outline-none">
+                <Share2 className="w-5 h-5" />
+                <span>Share</span>
+              </button>
+            </div>
+
+
           </motion.div>
         </motion.div>
       )}

@@ -93,6 +93,7 @@ export default function Map({ pins }: { pins: any[] }) {
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [userFirstName, setUserFirstName] = useState<string>('');
   const [userLastName, setUserLastName] = useState<string>('');
+  const [selectedPinLikes, setSelectedPinLikes] = useState<number>(0);
 
   const fetchPins = async () => {
     // Fetch pins from Supabase (you can uncomment this if you need it)
@@ -165,18 +166,49 @@ export default function Map({ pins }: { pins: any[] }) {
     setModalOpen(true);
 
     // Fetch user data
-    const { data, error } = await supabase
-      .from('users')
-      .select('firstname, lastname')
-      .eq('id', pin.user_id)
-      .single();
+    const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('firstname, lastname')
+    .eq('id', pin.user_id)
+    .single();
 
-    if (error) {
-      console.error('Error fetching user data:', error);
-    } else if (data) {
-      setUserFirstName(data.firstname);
-      setUserLastName(data.lastname);
+    if (userError) {
+    console.error(userError);
     }
+
+    // Fetch like count for the pin
+    const { count: likeCount, error: likeError } = await supabase
+    .from('likes')
+    .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
+    .eq('pin_id', pin.id)
+    .eq('vote_type', 1);
+
+    if (likeError) {
+    console.error(likeError);
+    }
+
+    // Fetch dislike count for the pin
+    const { count: dislikeCount, error: dislikeError } = await supabase
+    .from('likes')
+    .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
+    .eq('pin_id', pin.id)
+    .eq('vote_type', -1);
+
+    if (likeError) {
+    console.error(likeError);
+    }
+
+    // Combine the results in one object
+    const result = {
+    firstname: userData?.firstname,
+    lastname: userData?.lastname,
+    total_likes: (likeCount?? 0 ) - (dislikeCount ?? 0)
+    };
+    setUserFirstName(result.firstname);
+    setUserLastName(result.lastname);
+    setSelectedPinLikes(result.total_likes ?? 0);
+    console.log(result); // Check the final result
+
   };
 
   const closeModal = () => {
@@ -230,6 +262,8 @@ export default function Map({ pins }: { pins: any[] }) {
         description={selectedPin?.description || ''}
         firstname={userFirstName}
         lastname={userLastName}
+        like_count={selectedPinLikes}
+        pin_id={selectedPin?.id}
       />
     </div>
   );
