@@ -131,9 +131,10 @@ const Map: React.FC = () => {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
-      zoomControl: true,
+      zoomControl: false,
       styles: mapStyles,
       backgroundColor: '#f5f2e9',
+      gestureHandling: 'greedy',
     };
   
     const handleMarkerClick = (pin: any) => {
