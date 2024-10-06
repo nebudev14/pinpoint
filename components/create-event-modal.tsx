@@ -33,7 +33,7 @@ import { useCallback, useRef } from "react";
 import { cn } from "@/utils/cn";
 import { useUser } from "@clerk/nextjs";
 
-export default function CreateEventModal({ topics, open, setOpen }: { topics: any, open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
+export default function CreatePinModal({ topics, open, setOpen }: { topics: any, open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -49,9 +49,9 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
     lng: -74.006,
   };
 
-  const [eventName, setEventName] = useState("");
-  const [eventType, setEventType] = useState("");
-  const [eventDescription, setEventDescription] = useState(""); 
+  const [pinName, setpinName] = useState("");
+  const [pinType, setPinType] = useState("");
+  const [pinDescription, setpinDescription] = useState(""); 
   const [location, setLocation] = useState(center);
 
   // const { isLoaded } = useJsApiLoader({
@@ -72,13 +72,13 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
     });
   }, []);
 
-  async function handleCreateEvent(e: React.FormEvent){
+  async function handleCreatePin(e: React.FormEvent){
     console.log("CREATING NEW EVENT");
     e.preventDefault();
     console.log("Creating event:", {
-      name: eventName,
-      type: eventType,
-      description: eventDescription,
+      name: pinName,
+      type: pinType,
+      description: pinDescription,
       location,
     });
 
@@ -86,9 +86,9 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
     .from('pins') // Replace with your actual table name
     .insert([
       {
-        name: eventName,
-        description: eventDescription,
-        topic_id: eventType,
+        name: pinName,
+        description: pinDescription,
+        topic_id: pinType,
         latitude: location.lat,
         longitude: location.lng,
         user_id: user?.id,
@@ -101,8 +101,8 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
     console.log('Event added successfully:', data);
   }
 
-    setEventName("");
-    setEventType("");
+    setpinName("");
+    setPinType("");
     setLocation(center);
     setOpen(false);
   };
@@ -114,17 +114,17 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Create New Event</Button>
+        <Button variant="outline">Add Pin</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Event</DialogTitle>
+          <DialogTitle>Add Pin</DialogTitle>
           <DialogDescription>
-            Enter the details for your new event and select its location on the
+            Enter the details for your new pin and select its location on the
             map. Click create when you're done.
           </DialogDescription>
         </DialogHeader>
-          <form onSubmit={handleCreateEvent}>
+          <form onSubmit={handleCreatePin}>
             <div className="grid gap-4 py-4">
               <div className="grid items-center grid-cols-4 gap-4">
                 <Label htmlFor="event-name" className="text-right">
@@ -132,8 +132,8 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
                 </Label>
                 <Input
                   id="event-name"
-                  value={eventName}
-                  onChange={(e) => setEventName(e.target.value)}
+                  value={pinName}
+                  onChange={(e) => setpinName(e.target.value)}
                   className="col-span-3"
                 />
               </div>
@@ -148,11 +148,11 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
                       role="combobox"
                       className={cn(
                         "col-span-3 justify-between",
-                        !eventType && "text-muted-foreground"
+                        !pinType && "text-muted-foreground"
                       )}
                     >
-                      {eventType
-                        ? topics?.find((type: any) => type?.value === eventType)
+                      {pinType
+                        ? topics?.find((type: any) => type?.value === pinType)
                             ?.label
                         : "Select event type"}
                       <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
@@ -161,21 +161,21 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
                   <PopoverContent className="w-[300px] p-0">
                     <Command>
                       <CommandInput placeholder="Search event type..." />
-                      <CommandEmpty>No event type found.</CommandEmpty>
+                      <CommandEmpty>No pin category found.</CommandEmpty>
                       <CommandList>
                         {topics?.map((type: any) => (
                           <CommandItem
                             key={type?.value}
                             onSelect={() => {
-                              setEventType(
-                                type?.value === eventType ? "" : type?.value
+                              setPinType(
+                                type?.value === pinType ? "" : type?.value
                               );
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                eventType === type?.value
+                                pinType === type?.value
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
@@ -195,10 +195,10 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
               </Label>
               <Input
                 id="topic-description"
-                value={eventDescription}
-                onChange={(e) => setEventDescription(e.target.value)}
+                value={pinDescription}
+                onChange={(e) => setpinDescription(e.target.value)}
                 className="col-span-3"
-                placeholder="Enter event description"
+                placeholder="Enter pin description"
               />
             </div>
               <div className="grid items-center grid-cols-4 gap-4">
@@ -228,7 +228,7 @@ export default function CreateEventModal({ topics, open, setOpen }: { topics: an
             </div>
             <DialogFooter>
               <Button type="submit">
-                Create Event
+                Create Pin
               </Button>
             </DialogFooter>
         </form>

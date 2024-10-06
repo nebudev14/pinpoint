@@ -31,7 +31,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 import { motion, AnimatePresence } from "framer-motion";
-import CreateEventModal from "@/components/create-event-modal"; // Ensure this import is present
+import CreatePinModal from "@/components/create-event-modal"; // Ensure this import is present
 
 export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,7 +39,7 @@ export default function Component() {
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<MultiValue<{ value: number; label: string }>>([])
   const [queriedPins, setQueriedPins] = useState<any[]>([])
-  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  const [isCreatePinModalOpen, setIsCreatePinModalOpen] = useState(false);
   const [topics, setTopics] = useState<any[]>([]);
 
   // Mock data for upcoming events
@@ -73,7 +73,7 @@ export default function Component() {
     console.log("Database Found Topics:", data);
     setQueriedPins(data);
   };
-  console.log(isCreateEventModalOpen)
+  // console.log(isCreatePinModalOpen)
 
   useEffect(() => {
     const fetchTopics = async () => {
@@ -101,7 +101,7 @@ export default function Component() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsCreateEventModalOpen(true)}
+          onClick={() => setIsCreatePinModalOpen(true)}
         >
           <MapPin className="w-6 h-6" />
           <span className="sr-only">My Location</span>
@@ -118,10 +118,10 @@ export default function Component() {
           <Map pins={queriedPins}/>
         </div>
 
-        <CreateEventModal
+        <CreatePinModal
           topics={topics} // Ensure topics is defined or passed correctly
-          open={isCreateEventModalOpen}
-          setOpen={setIsCreateEventModalOpen}
+          open={isCreatePinModalOpen}
+          setOpen={setIsCreatePinModalOpen}
         />
 
         <div className="absolute z-10 top-20 left-4 right-4">
@@ -160,7 +160,7 @@ export default function Component() {
                       transition={{ duration: 0.2 }}
                     >
                       <button className="p-2 text-white bg-blue-500 rounded-full"
-                      onClick={() => setIsCreateEventModalOpen(!isCreateEventModalOpen)}>
+                      onClick={() => setIsCreatePinModalOpen(!isCreatePinModalOpen)}>
                         <MapPin size={20} />
                       </button>
                       <button className="p-2 text-white bg-green-500 rounded-full">
