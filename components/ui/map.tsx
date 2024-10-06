@@ -25,7 +25,7 @@ const containerStyle = {
   height: "100%",
 };
 
-const center = {
+const initCenter = {
   lat: 40.80793,
   lng: -73.9654486,
 };
@@ -87,6 +87,8 @@ export default function Map({ pins }: { pins: any[] }) {
   const [userFirstName, setUserFirstName] = useState<string>("");
   const [userLastName, setUserLastName] = useState<string>("");
 
+  const [center, setCenter] = useState<google.maps.LatLngLiteral>(initCenter);
+
   const fetchPins = async () => {
     // Fetch pins from Supabase (you can uncomment this if you need it)
     // const { data, error } = await supabase.from('pins').select('*');
@@ -107,6 +109,10 @@ export default function Map({ pins }: { pins: any[] }) {
           setUserLocation({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
+          });
+          setCenter({
+            lat: position.coords.latitude || initCenter.lat,
+            lng: position.coords.longitude || initCenter.lng,
           });
         },
         (error) => {
@@ -159,6 +165,7 @@ export default function Map({ pins }: { pins: any[] }) {
   const handleMarkerClick = async (pin: any) => {
     setSelectedPin(pin);
     setModalOpen(true);
+    setCenter({ lat: pin.latitude, lng: pin.longitude })
 
     // Fetch user data
     const { data, error } = await supabase
@@ -188,10 +195,7 @@ export default function Map({ pins }: { pins: any[] }) {
       >
         <GoogleMap
           mapContainerStyle={containerStyle}
-          center={{
-            lat: userLocation?.lat as number || center.lat,
-            lng: userLocation?.lng as number || center.lng,
-          }}
+          center={center}
           zoom={16}
           onLoad={onLoad}
           onUnmount={onUnmount}
@@ -212,7 +216,7 @@ export default function Map({ pins }: { pins: any[] }) {
 
           {mapRef.current && (
             <Marker
-              position={userLocation === null || userLocation === undefined ? center : userLocation}
+              position={userLocation === null || userLocation === undefined ? initCenter : userLocation}
               title="You are here"
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,
