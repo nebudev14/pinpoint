@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { createClient } from '@supabase/supabase-js';
 import Modal from './modal'; // Import your Modal component
-import { MultiValue } from 'react-select';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -19,41 +18,40 @@ const center = {
   lng: -73.963036,
 };
 
-// Updated map styles to hide points of interest
 const mapStyles = [
   {
     featureType: 'all',
     elementType: 'geometry',
     stylers: [
-      { color: '#f5f2e9' }, // Light beige background
+      { color: '#f5f2e9' },
     ],
   },
   {
     featureType: 'water',
     elementType: 'geometry',
     stylers: [
-      { color: '#b2e0ff' }, // Light blue for water
+      { color: '#b2e0ff' },
     ],
   },
   {
     featureType: 'landscape',
     elementType: 'geometry',
     stylers: [
-      { color: '#f7f2e6' }, // Light beige for landscape
+      { color: '#f7f2e6' },
     ],
   },
   {
     featureType: 'road',
     elementType: 'geometry',
     stylers: [
-      { color: '#ffffff' }, // White roads
+      { color: '#ffffff' },
     ],
   },
   {
     featureType: 'poi',
     elementType: 'all',
     stylers: [
-      { visibility: 'off' }, // Hides all points of interest
+      { visibility: 'off' },
     ],
   },
   {
@@ -61,28 +59,28 @@ const mapStyles = [
     elementType: 'geometry',
     stylers: [
       { color: '#e1f7d5' },
-      { visibility: 'on' }, // Set a different color for parks (light green)
+      { visibility: 'on' },
     ],
   },
   {
     featureType: 'transit',
     elementType: 'geometry',
     stylers: [
-      { color: '#f5f2e5' }, // Light peach for transit
+      { color: '#f5f2e5' },
     ],
   },
   {
     featureType: 'all',
     elementType: 'labels.text.fill',
     stylers: [
-      { color: '#7b6f5c' }, // Subtle beige for text
+      { color: '#7b6f5c' },
     ],
   },
   {
     featureType: 'all',
     elementType: 'labels.text.stroke',
     stylers: [
-      { color: '#ffffff' }, // White stroke for better readability
+      { color: '#ffffff' },
       { weight: 2 },
     ],
   },
@@ -90,9 +88,11 @@ const mapStyles = [
 
 export default function Map({ pins }: { pins: any[] }) {
   const mapRef = useRef<google.maps.Map | null>(null);
-  const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
-  const [selectedPin, setSelectedPin] = useState<any>(null); // State to store selected pin
-  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null); // State for user location
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPin, setSelectedPin] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
+  const [userFirstName, setUserFirstName] = useState<string>('');
+  const [userLastName, setUserLastName] = useState<string>('');
 
   const fetchPins = async () => {
     // Fetch pins from Supabase (you can uncomment this if you need it)
@@ -137,10 +137,10 @@ export default function Map({ pins }: { pins: any[] }) {
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 10,
-          fillColor: '#1A73E8', // Darker blue color
+          fillColor: '#1A73E8',
           fillOpacity: 1,
-          strokeWeight: 4, // Wider white border
-          strokeColor: '#FFFFFF', // White border
+          strokeWeight: 4,
+          strokeColor: '#FFFFFF',
         },
       });
     }
@@ -160,14 +160,30 @@ export default function Map({ pins }: { pins: any[] }) {
     gestureHandling: 'greedy',
   };
 
-  const handleMarkerClick = (pin: any) => {
+  const handleMarkerClick = async (pin: any) => {
     setSelectedPin(pin);
     setModalOpen(true);
+
+    // Fetch user data
+    const { data, error } = await supabase
+      .from('users')
+      .select('firstname, lastname')
+      .eq('id', pin.user_id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user data:', error);
+    } else if (data) {
+      setUserFirstName(data.firstname);
+      setUserLastName(data.lastname);
+    }
   };
 
   const closeModal = () => {
     setModalOpen(false);
     setSelectedPin(null);
+    setUserFirstName('');
+    setUserLastName('');
   };
 
   return (
@@ -181,41 +197,40 @@ export default function Map({ pins }: { pins: any[] }) {
           onUnmount={onUnmount}
           options={mapOptions}
         >
-          {/* Render a marker for each pin */}
           {pins.map(pin => (
             <Marker
               key={pin.id}
               position={{ lat: pin.latitude, lng: pin.longitude }}
-              onClick={() => handleMarkerClick(pin)} // Set click handler
-              title={pin.name} // Optional: Set the name of the pin as the marker title
+              onClick={() => handleMarkerClick(pin)}
+              title={pin.name}
             />
           ))}
 
-          {/* Marker for user location */}
           {userLocation && mapRef.current && (
             <Marker
               position={userLocation}
-              title="You are here" // Optional title for user location marker
+              title="You are here"
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,
-                scale: 10, // Size of the circle (slightly larger)
-                fillColor: '#1A73E8', // Darker blue color
+                scale: 10,
+                fillColor: '#1A73E8',
                 fillOpacity: 1,
-                strokeWeight: 4, // Wider white border
-                strokeColor: '#FFFFFF', // White border
+                strokeWeight: 4,
+                strokeColor: '#FFFFFF',
               }}
             />
           )}
         </GoogleMap>
       </LoadScript>
 
-      {/* Modal for displaying pin details */}
       <Modal
         isOpen={modalOpen}
         onClose={closeModal}
         title={selectedPin?.name || ''}
         description={selectedPin?.description || ''}
+        firstname={userFirstName}
+        lastname={userLastName}
       />
     </div>
   );
-};
+}

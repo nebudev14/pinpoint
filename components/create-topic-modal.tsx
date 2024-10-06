@@ -30,7 +30,7 @@ export default function CreateTopicModal() {
 
   console.log('CREATING NEW TOPIC');
 
-  async function handleCreateEvent(e: React.FormEvent){
+  async function handleCreatePin(e: React.FormEvent){
     console.log("REACHED")
     e.preventDefault();
     // Here you would typically send the data to your backend or state management system
@@ -76,7 +76,7 @@ export default function CreateTopicModal() {
             Fill in the details for your new topic. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleCreateEvent}>
+        <form onSubmit={handleCreatePin}>
         <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="topic-name" className="text-right">
