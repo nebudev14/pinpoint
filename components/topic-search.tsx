@@ -91,11 +91,12 @@ export default function TopicSelector({onSearch}: {onSearch: any}) {
     console.log("SEARCHING TOPICS");
     // e.preventDefault();
     console.log("Found Topics:", {selectedTopics});
+    console.log("searching for topic ids "+selectedTopics.map(topic => topic.value))
 
   const { data, error } = await supabase
     .from('pins') // Replace with your actual table name
     .select()
-    .in('id', selectedTopics.map(topic => topic.value));
+    .in('topic_id', selectedTopics.map(topic => topic.value));
 
   if (error) {
     console.error('Error queried event:', error);
