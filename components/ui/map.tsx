@@ -9,7 +9,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-
 const containerStyle = {
   width: '100%',
   height: '100%'
@@ -50,7 +49,6 @@ const mapStyles = [
       { color: '#ffffff' }, // White roads
     ],
   },
-
   {
     featureType: 'poi',
     elementType: 'all',
@@ -58,24 +56,14 @@ const mapStyles = [
       { visibility: 'off' }, // Hides all points of interest
     ],
   },
-  
-  {
-    featureType: 'poi',
-    elementType: 'geometry',
-    stylers: [
-      { visibility: 'off' }, // Hide points of interest
-    ],
-  },
-
   {
     featureType: 'poi.park',
     elementType: 'geometry',
     stylers: [
       { color: '#e1f7d5' },
-      { visibility: 'on'}, // Set a different color for parks (light green)
+      { visibility: 'on' }, // Set a different color for parks (light green)
     ],
   },
-
   {
     featureType: 'transit',
     elementType: 'geometry',
@@ -100,122 +88,134 @@ const mapStyles = [
   },
 ];
 
-
-export default function Map({pins}: {pins: any[]}) {
+export default function Map({ pins }: { pins: any[] }) {
   const mapRef = useRef<google.maps.Map | null>(null);
-    // const [pins, setPins] = useState<any[]>([]); // State to store pins
-    const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
-    const [selectedPin, setSelectedPin] = useState<any>(null); // State to store selected pin
-    const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null); // State for user location
-  
-    const fetchPins = async () => {
-      // const { data, error } = await supabase.from('pins').select('*');
-      // if (error) {
-      //   console.error('Error fetching pins:', error);
-      // } else {
-      //   setPins(data || []);
-      // }
-    };
-  
-    useEffect(() => {
-      fetchPins(); // Fetch pins on component mount
+  const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
+  const [selectedPin, setSelectedPin] = useState<any>(null); // State to store selected pin
+  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null); // State for user location
 
-      // Get the user's location
+  const fetchPins = async () => {
+    // Fetch pins from Supabase (you can uncomment this if you need it)
+    // const { data, error } = await supabase.from('pins').select('*');
+    // if (error) {
+    //   console.error('Error fetching pins:', error);
+    // } else {
+    //   setPins(data || []);
+    // }
+  };
+
+  useEffect(() => {
+    fetchPins(); // Fetch pins on component mount
+
+    // Get the user's location
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.error("Error getting location: ", error);
-          }
-        );
-      } else {
-        console.error("Geolocation is not supported by this browser.");
-      }
-    }, []);
-  
-    
-    const onLoad = useCallback((map: google.maps.Map) => {
-      mapRef.current = map;
-    }, []);
-  
-    const onUnmount = useCallback(() => {
-      mapRef.current = null;
-    }, []);
-  
-    const mapOptions: google.maps.MapOptions = {
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-      zoomControl: false,
-      styles: mapStyles,
-      backgroundColor: '#f5f2e9',
-      gestureHandling: 'greedy',
-    };
-  
-    const handleMarkerClick = (pin: any) => {
-        setSelectedPin(pin);
-        setModalOpen(true);
-      };
-    
-      const closeModal = () => {
-        setModalOpen(false);
-        setSelectedPin(null);
-      };
-  
-    return (
-      <div className='h-screen'>
-        <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={16}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-            options={mapOptions}
-          >
-            {/* Render a marker for each pin */}
-            {pins.map(pin => (
-              <Marker
-                key={pin.id}
-                position={{ lat: pin.latitude, lng: pin.longitude }}
-                onClick={() => handleMarkerClick(pin)} // Set click handler
-                title={pin.name} // Optional: Set the name of the pin as the marker title
-              />
-            ))}
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
 
-             {/* Marker for user location */}
-          {userLocation && (
+  const onLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+
+    // Ensure google object is defined before using it
+    if (userLocation && google) {
+      new google.maps.Marker({
+        position: userLocation,
+        map: map,
+        title: "You are here",
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: '#1A73E8', // Darker blue color
+          fillOpacity: 1,
+          strokeWeight: 4, // Wider white border
+          strokeColor: '#FFFFFF', // White border
+        },
+      });
+    }
+  }, [userLocation]);
+
+  const onUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  const mapOptions: google.maps.MapOptions = {
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    zoomControl: false,
+    styles: mapStyles,
+    backgroundColor: '#f5f2e9',
+    gestureHandling: 'greedy',
+  };
+
+  const handleMarkerClick = (pin: any) => {
+    setSelectedPin(pin);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedPin(null);
+  };
+
+  return (
+    <div className='h-screen'>
+      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={center}
+          zoom={16}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={mapOptions}
+        >
+          {/* Render a marker for each pin */}
+          {pins.map(pin => (
             <Marker
-            position={userLocation}
-            title="You are here" // Optional title for user location marker
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 10, // Size of the circle (slightly larger)
-              fillColor: '#1A73E8', // Darker blue color
-              fillOpacity: 1,
-              strokeWeight: 4, // Wider white border
-              strokeColor: '#FFFFFF', // White border
+              key={pin.id}
+              position={{ lat: pin.latitude, lng: pin.longitude }}
+              onClick={() => handleMarkerClick(pin)} // Set click handler
+              title={pin.name} // Optional: Set the name of the pin as the marker title
+            />
+          ))}
+
+          {/* Marker for user location */}
+          {userLocation && mapRef.current && (
+            <Marker
+              position={userLocation}
+              title="You are here" // Optional title for user location marker
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10, // Size of the circle (slightly larger)
+                fillColor: '#1A73E8', // Darker blue color
+                fillOpacity: 1,
+                strokeWeight: 4, // Wider white border
+                strokeColor: '#FFFFFF', // White border
               }}
             />
           )}
+        </GoogleMap>
+      </LoadScript>
 
-          </GoogleMap>
-        </LoadScript>
-  
-        {/* Modal for displaying pin details */}
-        <Modal
-          isOpen={modalOpen}
-          onClose={closeModal}
-          title={selectedPin?.name || ''}
-          description={selectedPin?.description || ''}
-        />
-      </div>
-    );
-  };
-  
-  // export default React.memo(Map);
+      {/* Modal for displaying pin details */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={selectedPin?.name || ''}
+        description={selectedPin?.description || ''}
+      />
+    </div>
+  );
+};
