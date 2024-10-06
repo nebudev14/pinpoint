@@ -79,7 +79,18 @@ const mapStyles = [
   },
 ];
 
-export default function Map({ pins }: { pins: any[] }) {
+export default function Map({
+  pins,
+  onMapClick,
+  location,
+  style,
+}: {
+  pins: any[];
+  onMapClick?: (e: google.maps.MapMouseEvent) => void;
+  location?: google.maps.LatLngLiteral;
+  setLocation?: (location: google.maps.LatLngLiteral) => void;
+  style?: any;
+}) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPin, setSelectedPin] = useState<any>(null);
@@ -167,52 +178,51 @@ export default function Map({ pins }: { pins: any[] }) {
   const handleMarkerClick = async (pin: any) => {
     setSelectedPin(pin);
     setModalOpen(true);
-    setCenter({ lat: pin.latitude, lng: pin.longitude })
+    setCenter({ lat: pin.latitude, lng: pin.longitude });
 
     // Fetch user data
     const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('firstname, lastname')
-    .eq('id', pin.user_id)
-    .single();
+      .from("users")
+      .select("firstname, lastname")
+      .eq("id", pin.user_id)
+      .single();
 
     if (userError) {
-    console.error(userError);
+      console.error(userError);
     }
 
     // Fetch like count for the pin
     const { count: likeCount, error: likeError } = await supabase
-    .from('likes')
-    .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
-    .eq('pin_id', pin.id)
-    .eq('vote_type', 1);
+      .from("likes")
+      .select("pin_id", { count: "exact" }) // 'exact' gives the actual count
+      .eq("pin_id", pin.id)
+      .eq("vote_type", 1);
 
     if (likeError) {
-    console.error(likeError);
+      console.error(likeError);
     }
 
     // Fetch dislike count for the pin
     const { count: dislikeCount, error: dislikeError } = await supabase
-    .from('likes')
-    .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
-    .eq('pin_id', pin.id)
-    .eq('vote_type', -1);
+      .from("likes")
+      .select("pin_id", { count: "exact" }) // 'exact' gives the actual count
+      .eq("pin_id", pin.id)
+      .eq("vote_type", -1);
 
     if (likeError) {
-    console.error(likeError);
+      console.error(likeError);
     }
 
     // Combine the results in one object
     const result = {
-    firstname: userData?.firstname,
-    lastname: userData?.lastname,
-    total_likes: (likeCount?? 0 ) - (dislikeCount ?? 0)
+      firstname: userData?.firstname,
+      lastname: userData?.lastname,
+      total_likes: (likeCount ?? 0) - (dislikeCount ?? 0),
     };
     setUserFirstName(result.firstname);
     setUserLastName(result.lastname);
     setSelectedPinLikes(result.total_likes ?? 0);
     console.log(result); // Check the final result
-
   };
 
   const closeModal = () => {
@@ -222,17 +232,18 @@ export default function Map({ pins }: { pins: any[] }) {
     setUserLastName("");
   };
   return (
-    <div className="h-screen">
+    <div className={!onMapClick ? "h-screen" : ""}>
       <LoadScript
         googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
       >
         <GoogleMap
-          mapContainerStyle={containerStyle}
+          mapContainerStyle={style || containerStyle}
           center={center}
           zoom={16}
           onLoad={onLoad}
           onUnmount={onUnmount}
           options={mapOptions}
+          onClick={onMapClick || undefined}
         >
           {pins.map((pin) => (
             <Marker
@@ -246,10 +257,15 @@ export default function Map({ pins }: { pins: any[] }) {
               }}
             />
           ))}
+          {location && <Marker position={location} title="Selected Location" />}
 
           {mapRef.current && (
             <Marker
-              position={userLocation === null || userLocation === undefined ? initCenter : userLocation}
+              position={
+                userLocation === null || userLocation === undefined
+                  ? initCenter
+                  : userLocation
+              }
               title="You are here"
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,

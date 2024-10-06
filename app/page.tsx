@@ -25,6 +25,8 @@ export default function Home() {
     }
   }, [isSignedIn, router]);
 
+  console.log(isSignedIn);
+
   return (
     <>
       {/* <Hero />
@@ -50,9 +52,7 @@ export default function Home() {
           <nav className="flex gap-4 ml-auto sm:gap-6">
             {!isSignedIn ? (
               <SignInButton mode="modal">
-                <Button asChild>
-                  <Link href="#signin">Sign In</Link>
-                </Button>
+                <Button >Sign In</Button>
               </SignInButton>
             ) : (
               <SignOutButton />
