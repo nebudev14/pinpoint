@@ -30,9 +30,9 @@ export default function Component({ isOpen, onClose, title, description, firstna
   const [disliked, setDisliked] = useState(false);
 
   useEffect(() => {
-    setLiked(
+    // setLiked(
 
-    )
+    // )
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
@@ -52,10 +52,10 @@ export default function Component({ isOpen, onClose, title, description, firstna
   const handleUpvote = async () => {
     setLikes((prevLikes) => prevLikes + 1);
     console.log("LIKED, TOTAL LIKES " + likes)
-    const { liked: liked, error: likeError } = await supabase
+    const { data: liked, error: likeError } = await supabase
       .from('likes')
       .select('pin_id', { count: 'exact' })  // 'exact' gives the actual count
-      .eq('pin_id', pin.id);
+      .eq('pin_id', pin_id);
 
     if (likeError) {
       console.error(likeError);
